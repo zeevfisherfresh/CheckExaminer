@@ -228,5 +228,5 @@ def get_names():
     mydb = mongo_client["patents"]
     db = mongo_client["patents"]
     examiners_collection = mydb.get_collection("examiners_new" , codec_options=codec_options)
-
-    return str([(i['examiner']) for i in examiners_collection.find()])
+    from flask import jsonify
+    return jsonify([(i['examiner']) for i in examiners_collection.find()])
