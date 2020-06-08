@@ -196,3 +196,37 @@ def hello_world():
         text = reporting_text
         html = "<html><body>"+reporting_text+"</body></html>"
         return (html)
+
+@app.route('/list_examiners')
+def get_names():
+        ## Initializing the mongo connection
+    connection_string = 'mongodb+srv://Zeevtest:Zeevtest@freship-fu97s.mongodb.net/test?retryWrites=true&w=majority'
+    from bson.decimal128 import Decimal128
+    from bson.codec_options import TypeCodec
+    class DecimalCodec(TypeCodec):
+        python_type = Decimal    # the Python type acted upon by this type codec
+        bson_type = Decimal128   # the BSON type acted upon by this type codec
+        def transform_python(self, value):
+            """Function that transforms a custom type value into a type
+            that BSON can encode."""
+            return Decimal128(value)
+        def transform_bson(self, value):
+            """Function that transforms a vanilla BSON type value into our
+            custom type."""
+            return value.to_decimal()
+    decimal_codec = DecimalCodec()
+
+    today = date.today()
+    cutoff_date = today - timedelta(days=70)
+
+    from bson.codec_options import TypeRegistry
+    type_registry = TypeRegistry([decimal_codec])
+    from bson.codec_options import CodecOptions
+    codec_options = CodecOptions(type_registry=type_registry)
+
+    mongo_client = pymongo.MongoClient(connection_string)
+    mydb = mongo_client["patents"]
+    db = mongo_client["patents"]
+    examiners_collection = mydb.get_collection("examiners_new" , codec_options=codec_options)
+
+    return str([(i['examiner']) for i in examiners_collection.find()])
