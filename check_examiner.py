@@ -36,7 +36,15 @@ import json
 import pymongo
 from decimal import *
 from flask import request
+from flask_caching import Cache
+config = {
+    "DEBUG": True,          # some Flask specific configs
+    "CACHE_TYPE": "simple", # Flask-Caching related configs
+    "CACHE_DEFAULT_TIMEOUT": 300
+}
 app = Flask(__name__)
+app.config.from_mapping(config)
+cache = Cache(app)
 from flask_cors import CORS, cross_origin
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
@@ -198,6 +206,7 @@ def hello_world():
         return (html)
 
 @app.route('/list_examiners')
+@cache.cached(timeout=3600)
 def get_names():
         ## Initializing the mongo connection
     connection_string = 'mongodb+srv://Zeevtest:Zeevtest@freship-fu97s.mongodb.net/test?retryWrites=true&w=majority'
