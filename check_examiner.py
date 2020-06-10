@@ -28,6 +28,7 @@ def get_month_text (number):
         return "December"
 
 from flask import Flask
+from flask import jsonify
 import datetime
 from datetime import date, timedelta
 import pprint
@@ -181,13 +182,14 @@ def hello_world():
         reporting_text = reporting_text + "<br>Response success rate (chances to overcome one office action): "
         reporting_text = reporting_text + str(response_success_rate)
         reporting_text = reporting_text + "<br><br>Full monthly stats: "
-
+        months = {}
         for i in range (0,13):
             if (failed_month[i] !=0):
                 month_stat[i] = successful_month[i] / (successful_month[i] + failed_month [i])
                 month_stat[i] = "%.0f%%" % (100 * month_stat[i])
                 if (i !=0):
                     reporting_text = reporting_text + str(get_month_text(i)) + ": " + month_stat[i] + " | "
+                    months[get_month_text(i)] = month_stat[i]
 
         #print (reporting_text)
 
@@ -203,7 +205,16 @@ def hello_world():
         # Create the plain-text and HTML version of your message
         text = reporting_text
         html = "<html><body>"+reporting_text+"</body></html>"
-        return (html)
+        result = {}
+        result['examiner_name'] = examiner_name
+        result['examiner_apps_we_have'] = examiner_apps_we_have
+        result['examiner_grant_rate'] = examiner_grant_rate
+        result['examiner_grant_rate_with_interview'] = examiner_grant_rate_with_interview
+        result['examiner_grant_rate_without_interview'] = examiner_grant_rate_without_interview
+        result['response_success_rate'] = response_success_rate
+        result['interview_improvement_rate'] = interview_improvement_rate
+        result['months'] = months
+        return jsonify(result)
 
 @app.route('/list_examiners')
 @cache.cached(timeout=3600)
@@ -237,5 +248,4 @@ def get_names():
     mydb = mongo_client["patents"]
     db = mongo_client["patents"]
     examiners_collection = mydb.get_collection("examiners_new" , codec_options=codec_options)
-    from flask import jsonify
     return jsonify([(i['examiner']) for i in examiners_collection.find()])
