@@ -170,6 +170,7 @@ def hello_world():
         recommended_month_stat = "%.0f%%" % (100 * recommended_month_stat)
         response_success_rate = "%.0f%%" % (100 * response_success_rate)
 
+
         # Here ends the monthly data.
 
         reporting_text = "<br><br>Hi there! The examiner's name is: "
@@ -214,6 +215,8 @@ def hello_world():
         result['response_success_rate'] = response_success_rate
         result['interview_improvement_rate'] = interview_improvement_rate
         result['months'] = months
+        result['response_success_rate'] = response_success_rate
+        
         return jsonify(result)
 
 @app.route('/list_examiners')
