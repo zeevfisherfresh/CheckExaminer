@@ -249,3 +249,34 @@ def get_names():
     db = mongo_client["patents"]
     examiners_collection = mydb.get_collection("examiners_new" , codec_options=codec_options)
     return jsonify([(i['examiner']) for i in examiners_collection.find()])
+
+@app.route('/search_app')
+def search_app():
+    ## Initializing the mongo connection
+    import requests
+
+    headers = {
+        'Content-type': 'application/json',
+    }
+    name = request.args['name']
+
+    data = '{"searchText":"firstNamedApplicant:(' + name + ')","fq":["appStatus:\\"Patented Case\\""],"fl":"patentTitle firstNamedApplicant appExamName appStatus","mm":"100%","df":"patentTitle","qf":"firstNamedApplicant ","facet":"false","sort":"applId asc","start":"0"}'
+    print(data)
+    return jsonify(list(set([i['firstNamedApplicant'][0] for i in requests.post('https://ped.uspto.gov/api/queries', headers=headers, data=data).json()['queryResults']['searchResponse']['response']['docs']])))
+
+@app.route('/get_apps')
+def get_apps():
+    ## Initializing the mongo connection
+    import requests
+
+    headers = {
+        'Content-type': 'application/json',
+    }
+    name = request.args['name']
+
+    page = int(request.args.get('page', 0))
+
+    data = '{"searchText":"firstNamedApplicant:(' + name + ')","fq":["appStatus:\\"Patented Case\\""],"fl":"patentTitle firstNamedApplicant appExamName appStatus","mm":"100%","df":"patentTitle","qf":"firstNamedApplicant ","facet":"false","sort":"applId asc","start":"' + str(page * 20) + '"}'
+    print(data)
+    return jsonify(requests.post('https://ped.uspto.gov/api/queries', headers=headers, data=data).json())
+
