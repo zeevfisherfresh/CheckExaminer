@@ -260,7 +260,7 @@ def search_app():
     }
     name = request.args['name']
 
-    data = '{"searchText":"firstNamedApplicant:(' + name + ')","fq":["appStatus:\\"Patented Case\\""],"fl":"patentTitle firstNamedApplicant appExamName appStatus","mm":"100%","df":"patentTitle","qf":"firstNamedApplicant ","facet":"false","sort":"applId asc","start":"0"}'
+    data = '{"searchText":"firstNamedApplicant:(' + name + ')","fl":"patentTitle firstNamedApplicant appExamName ","mm":"100%","df":"patentTitle","qf":"firstNamedApplicant ","facet":"false","sort":"applId asc","start":"0"}'
     print(data)
     return jsonify(list(set([i['firstNamedApplicant'][0] for i in requests.post('https://ped.uspto.gov/api/queries', headers=headers, data=data).json()['queryResults']['searchResponse']['response']['docs']])))
 
@@ -276,7 +276,7 @@ def get_apps():
 
     page = int(request.args.get('page', 0))
 
-    data = '{"searchText":"firstNamedApplicant:(' + name + ')","fq":["appStatus:\\"Patented Case\\""],"fl":"patentTitle firstNamedApplicant appExamName appStatus","mm":"100%","df":"patentTitle","qf":"firstNamedApplicant ","facet":"false","sort":"applId asc","start":"' + str(page * 20) + '"}'
+    data = '{"searchText":"firstNamedApplicant:(' + name + ')","fl":"patentTitle firstNamedApplicant appExamName","mm":"100%","df":"patentTitle","qf":"firstNamedApplicant ","facet":"false","sort":"applId asc","start":"' + str(page * 20) + '"}'
     print(data)
     return jsonify(requests.post('https://ped.uspto.gov/api/queries', headers=headers, data=data).json())
 
