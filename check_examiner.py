@@ -264,7 +264,24 @@ def search_app():
     print(data)
     return jsonify(list(set([i['firstNamedApplicant'][0] for i in requests.post('https://ped.uspto.gov/api/queries', headers=headers, data=data).json()['queryResults']['searchResponse']['response']['docs']])))
 
-@app.route('/get_app_by_id')
+
+@app.route('/get_apps')
+def get_apps():
+    ## Initializing the mongo connection
+    import requests
+
+    headers = {
+        'Content-type': 'application/json',
+    }
+    name = request.args['name']
+
+    page = int(request.args.get('page', 0))
+
+    data = '{"searchText":"firstNamedApplicant:(' + name + ')","fq":["appStatus:\\"Patented Case\\""],"fl":"patentTitle firstNamedApplicant appExamName appStatus","mm":"100%","df":"patentTitle","qf":"firstNamedApplicant ","facet":"false","sort":"applId asc","start":"' + str(page * 20) + '"}'
+    print(data)
+    return jsonify(requests.post('https://ped.uspto.gov/api/queries', headers=headers, data=data).json())@app.route('/get_app_by_id')
+
+@app.route('/get_apps_by_id')
 def get_apps():
     ## Initializing the mongo connection
     import requests
