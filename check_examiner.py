@@ -277,9 +277,9 @@ def get_apps():
 
     page = int(request.args.get('page', 0))
 
-    data = '{"searchText":"firstNamedApplicant:(' + name + ')","fq":["appStatus:\\"Patented Case\\""],"fl":"patentTitle firstNamedApplicant appExamName appStatus","mm":"100%","df":"patentTitle","qf":"firstNamedApplicant ","facet":"false","sort":"applId asc","start":"' + str(page * 20) + '"}'
+    data = '{"searchText":"firstNamedApplicant:(' + name + ')","fq":["appStatus:\\"Patented Case\\""],"fl":"patentTitle firstNamedApplicant appExamName appStatus applId","mm":"100%","df":"patentTitle","qf":"firstNamedApplicant ","facet":"false","sort":"applId asc","start":"' + str(page * 20) + '"}'
     print(data)
-    return jsonify(requests.post('https://ped.uspto.gov/api/queries', headers=headers, data=data).json())@app.route('/get_app_by_id')
+    return jsonify(requests.post('https://ped.uspto.gov/api/queries', headers=headers, data=data).json())
 
 @app.route('/get_apps_by_id')
 def get_apps_by_id():
