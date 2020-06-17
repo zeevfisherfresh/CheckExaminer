@@ -282,7 +282,7 @@ def get_apps():
     return jsonify(requests.post('https://ped.uspto.gov/api/queries', headers=headers, data=data).json())@app.route('/get_app_by_id')
 
 @app.route('/get_apps_by_id')
-def get_apps():
+def get_apps_by_id():
     ## Initializing the mongo connection
     import requests
 
