@@ -31,6 +31,9 @@ from flask import Flask
 from flask import jsonify
 import datetime
 from datetime import date, timedelta
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
 import pprint
 from pprint import pprint
 import json
@@ -38,6 +41,8 @@ import pymongo
 from decimal import *
 from flask import request
 from flask_caching import Cache
+from email.mime.multipart import MIMEMultipart
+matplotlib.use('agg')
 config = {
     "DEBUG": True,          # some Flask specific configs
     "CACHE_TYPE": "simple", # Flask-Caching related configs
@@ -51,7 +56,12 @@ cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 @app.route('/')
 @app.route('/data')
-def hello_world():
+def get_examiner():
+        ## Initializing the mongo connection
+    examiner_name = request.args['name']
+    return jsonify(hello_world(examiner_name))
+
+def hello_world(examiner_name):
         ## Initializing the mongo connection
     connection_string = 'mongodb+srv://Zeevtest:Zeevtest@freship-fu97s.mongodb.net/test?retryWrites=true&w=majority'
     from bson.decimal128 import Decimal128
@@ -82,7 +92,6 @@ def hello_world():
     db = mongo_client["patents"]
     examiners_collection = mydb.get_collection("examiners_new" , codec_options=codec_options)
 
-    examiner_name = request.args['name']
     print(examiner_name)
     examiner_record = examiners_collection.find_one({'examiner':examiner_name})
 
@@ -214,7 +223,7 @@ def hello_world():
         result['response_success_rate'] = response_success_rate
         result['interview_improvement_rate'] = interview_improvement_rate
         result['months'] = months
-        return jsonify(result)
+        return (result)
 
 @app.route('/list_examiners')
 @cache.cached(timeout=3600)
@@ -296,4 +305,68 @@ def get_apps_by_id():
     data = '{"searchText":"applId:(' + name + ')","fl":"applId patentTitle firstNamedApplicant appExamName","mm":"100%","df":"patentTitle","qf":"applId","facet":"false","sort":"applId asc","start":"' + str(page * 20) + '"}'
     print(data)
     return jsonify(requests.post('https://ped.uspto.gov/api/queries', headers=headers, data=data).json())
+
+@app.route('/email')
+def send_email():
+    from email.mime.multipart import MIMEMultipart
+    from email.mime.text import MIMEText
+    from email.mime.image import MIMEImage
+    import smtplib
+
+    # create message object instance
+    msg = MIMEMultipart()
+
+    examiner_name = request.args['name']
+    email = request.args['email']
+    resp = hello_world(examiner_name)
+    message = "<br><br>Hi there! The examiner's name is: " + "\n"
+    message = message + examiner_name + "\n"
+    message = message + "<br><br>We crunched through "
+    message = message + str(resp['examiner_apps_we_have']) + "\n"
+    message = message + " applications for this examiner and here is what we can tell you:<br><br>" + "\n"
+    message = message + "Grant rate (chances to eventually reach a grant): " + "\n"
+    message = message + str(resp['examiner_grant_rate']) + "with interview: " + str(resp['examiner_grant_rate_with_interview']) + " / without interview: " + str(resp['examiner_grant_rate_without_interview']) + " improvement rate: " + str(resp['interview_improvement_rate'])
+    message = message + "<br>Response success rate (chances to overcome one office action): "
+    message = message + str(resp['response_success_rate']) + "\n"
+    objects = resp['months'].keys()
+    y_pos = np.arange(len(objects))
+    monto = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+    print(y_pos)
+    performance = [int(resp['months'][month].replace('%', '')) for month in monto]
+    print(performance)
+
+    plt.bar(y_pos, performance)
+    plt.xlabel('Month Number')
+    plt.ylabel('Success percentage rate by month')
+    plt.legend(loc='upper left')
+    plt.grid(True, linewidth= 1, linestyle="--")
+    plt.savefig('temp.png')
+    fp = open('temp.png', 'rb')
+    img = MIMEImage(fp.read())
+    # setup the parameters of the message
+    password = "df8hypJVCXscFmNH"
+    msg['From'] = "zeev@freship.com"
+    msg['To'] = email
+    msg['Subject'] = "Export result for examiner " + examiner_name
+
+    # add in the message body
+    msg.attach(MIMEText(message, 'plain'))
+    img.add_header('Content-ID', '<{}>'.format('temp.png'))
+    msg.attach(img)
+    #create server
+    server = smtplib.SMTP('smtp-relay.sendinblue.com: 587')
+
+    server.starttls()
+
+    # Login Credentials for sending the mail
+    server.login(msg['From'], password)
+
+
+    # send the message via the server.
+    server.sendmail(msg['From'], msg['To'], msg.as_string())
+
+    server.quit()
+
+    print("successfully sent email to %s:" % (msg['To']))
+    return "success"
 
