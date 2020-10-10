@@ -151,6 +151,59 @@ body {
   padding: 20px;
 }
 
+
+.color-with-marker {
+  list-style-position: inside;
+}
+.color-with-marker ::marker {
+  color: red;
+}
+
+.color-with-pseudo {
+  list-style: none;
+  list-style-position: inside;
+}
+.color-with-pseudo li::before {
+  content: "•";
+  font-size: 130%;
+  line-height: 0;
+  margin: 0 0.3rem 0 -0.25rem;
+  position: relative;
+  top: 0.08rem;
+  color: red;
+}
+
+.color-with-svg {
+  list-style: none;
+}
+.color-with-svg li::before {
+  content: "";
+  width: 1em;
+  height: 1em;
+  display: inline-block;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='red'/%3E%3C/svg%3E");
+  background-size: 38%;
+  background-repeat: no-repeat;
+  background-position: left center;
+  position: relative;
+  top: 0.08rem;
+}
+
+.button {
+  background-color: #4CAF50; /* Green */
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: right;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+    margin:  auto;
+
+}
+
+
+
     </style>
   </head>
 

@@ -135,16 +135,20 @@ fillDataList();
 
 
 function putResult(item, index) {
-    console.log(item, index)
-    var setButton = document.createElement("span");
-    setButton.textContent = item;
-    setButton.className = 'container-title';
-    setButton.id = index;
-    setButton.href = "#" + item;
-    setButton.addEventListener("click", function() {
-        get_apps(item);
-    });
-    document.getElementById("resultsa").appendChild(setButton).appendChild(document.createElement("br")).appendChild(document.createElement("br"));
+
+        var setButton = document.createElement("small");
+
+      setButton.innerHTML = '<div class="header2" width="80px">  <table >  ' +
+          '     <tr width="80%">  ' +
+          '       <th width="50%"><div>' + item + '</div></th>  ' +
+          '     </tr> '
+          '   </table></div>';
+      setButton.id = index;
+      setButton.href = "#" + item;
+      setButton.addEventListener("click", function() {
+          get_apps(item);
+      });
+      document.getElementById("resultsa").appendChild(setButton).appendChild(document.createElement("br"));
 }
 
 function putApplication(item, index) {
@@ -208,7 +212,7 @@ function addNextPageButton(name, page) {
     var setButton = document.createElement("button");
     setButton.textContent = "Search for more";
     setButton.id = "next";
-    setButton.className = "examine-btn"
+    setButton.className = "button"
     setButton.addEventListener("click", function() {
         get_apps_page(name, page);
     });
