@@ -1,4 +1,4 @@
-function runSwitchjs() {
+function runSwitchjs(html) {
   var name = document.getElementById("fname").value;
   fetch("data?name=" + name)
     .then(function (response) {
@@ -23,7 +23,7 @@ function runSwitchjs() {
           "November",
           "December",
         ];
-        document.getElementById("result").innerHTML = `
+        document.getElementById("result").innerHTML =  html + `
         <div class='container'>
           <span class='container-title'>Examiner:</span>
           <span class='container-data'>${json["examiner_name"]} <br> (Stats based on ${json["examiner_apps_we_have"]} apps)</span>
@@ -187,7 +187,7 @@ function putApplication(item, index) {
           setButton.id = index;
           setButton.href = "#"+item;
           setButton.addEventListener("click", function() {
-            getExaminer(item['appExamName']);
+            getExaminer(item['appExamName'], setButton.innerHTML);
           });
       document.getElementById("resultsa").appendChild(setButton).appendChild(document.createElement("br"));
     }
@@ -218,10 +218,10 @@ function addNextPageButton(name, page) {
 }
 
 
-function getExaminer(examiner) {
+function getExaminer(examiner, html) {
   document.getElementById("fname").value = examiner
   document.getElementById("examtab").click()
-  runSwitchjs()
+  runSwitchjs(html)
 }
 
 function search_applicants() {
