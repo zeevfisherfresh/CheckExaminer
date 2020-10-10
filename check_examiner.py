@@ -42,6 +42,8 @@ from decimal import *
 from flask import request
 from flask_caching import Cache
 from email.mime.multipart import MIMEMultipart
+from flask import Flask, render_template, request, jsonify
+
 matplotlib.use('agg')
 config = {
     "DEBUG": True,          # some Flask specific configs
@@ -60,6 +62,11 @@ def get_examiner():
         ## Initializing the mongo connection
     examiner_name = request.args['name']
     return jsonify(hello_world(examiner_name))
+
+# index route, shows index.html view
+@app.route('/application')
+def index():
+  return render_template('index.html')
 
 def hello_world(examiner_name):
         ## Initializing the mongo connection
@@ -286,7 +293,7 @@ def get_apps():
 
     page = int(request.args.get('page', 0))
 
-    data = '{"searchText":"firstNamedApplicant:(' + name + ')","fq":["appStatus:\\"Patented Case\\""],"fl":"patentTitle firstNamedApplicant appExamName appStatus applId","mm":"100%","df":"patentTitle","qf":"firstNamedApplicant ","facet":"false","sort":"applId asc","start":"' + str(page * 20) + '"}'
+    data = '{"searchText":"firstNamedApplicant:(' + name + ')","fl":"*","mm":"100%","df":"patentTitle","qf":"firstNamedApplicant ","facet":"false","sort":"applId asc","start":"' + str(page * 20) + '"}'
     print(data)
     return jsonify(requests.post('https://ped.uspto.gov/api/queries', headers=headers, data=data).json())
 

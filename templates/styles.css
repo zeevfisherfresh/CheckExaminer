@@ -1,0 +1,115 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&display=swap");
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  font-family: "Montserrat", sans-serif;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 0 20px 30px 20px;
+  width: 400px;
+}
+
+.fname-input,
+.examine-btn {
+  font-size: 16px;
+}
+
+.fname-input {
+  width: 100%;
+  border-radius: 5px;
+  border: 1px solid;
+  padding: 5px 10px;
+  margin-bottom: 5px;
+}
+
+.examine-btn {
+  width: 100%;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  background: #2853b8;
+  color: #fff;
+  font-weight: 400;
+  letter-spacing: 1px;
+}
+
+.examine-btn:hover {
+  background: #1d3d8a;
+}
+
+.container:first-child {
+  margin-top: 30px;
+}
+
+.container {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px;
+}
+
+.container .container-title {
+  font-weight: 500;
+  font-size: 15px;
+  max-width: 200px;
+}
+
+.container .container-data {
+  text-align: right;
+}
+
+.months {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.months .months-title {
+  font-weight: 600;
+  font-size: 16px;
+  margin: 10px 0;
+}
+
+.months .months-title:before {
+  display: block;
+  content: "";
+  background: silver;
+  height: 1px;
+  right: 10px;
+  margin: 0 30px;
+  margin-bottom: 10px;
+}
+
+.months .months-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  font-weight: 300;
+  letter-spacing: 1.3px;
+  text-align: center;
+  font-size: 13px;
+  margin-top: 10px;
+}
+
+.months .months-list .month-data {
+  line-height: 18px;
+}
+
+.months .months-list .month-data:not(:last-child):after {
+  display: inline-block;
+  content: "-";
+  margin: 0 3px;
+}
+
+ body {
+          font-family: 'Calibri';
+        margin: auto;
+  background-image: url('https://3sr05l2l7ihe1u4u613nqp53-wpengine.netdna-ssl.com/wp-content/uploads/2019/11/iStock-1145847839.jpg');
+      }
