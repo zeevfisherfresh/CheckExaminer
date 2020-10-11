@@ -174,7 +174,7 @@ function putApplication(item, index) {
         var date1 = new Date(lastEvent.replace(/-/g, "/"));
         date1 = new Date(date1.setMonth(date1.getMonth() + 6));
         var date2 = new Date();
-        var diffDays = parseInt((date2 - date1) / (1000 * 60 * 60 * 24), 10);
+        var diffDays = parseInt((date1 - date2) / (1000 * 60 * 60 * 24), 10);
         var setButton = document.createElement("small");
         setButton.innerHTML = '<div class="header2" width="80px">  <table >  ' +
             '     <tr width="80%">  ' +
