@@ -173,35 +173,54 @@ function putApplication(item, index) {
         console.log(lastEvent.replace(/-/g, "/"))
         var date1 = new Date(lastEvent.replace(/-/g, "/"));
         //date1 = new Date(date1.setMonth(date1.getMonth() + 6));
-
         date3 = new Date(date1.setMonth(date1.getMonth() + 3));
         date4 = new Date(date1.setMonth(date1.getMonth() + 4));
         date5 = new Date(date1.setMonth(date1.getMonth() + 5));
         date6 = new Date(date1.setMonth(date1.getMonth() + 6));
-
+        
         var datenow = new Date();
+        var deadline = new date1();
         var diffDays = parseInt((date1 - datenow) / (1000 * 60 * 60 * 24), 10);
         console.log ("difference between now and office action")
         console.log (diffDays)
 
         if (diffDays > 0 && diffDays <90) {
-
-            console.log ('no extension')
+            console.log ('no extension');
+            deadline = new Date(date1.setMonth(date1.getMonth() + 3)); 
+            console.log (deadline)
         }
 
         if (diffDays >= 90 && diffDays <120) {
 
             console.log ('1st extension')
+            deadline = new Date(date1.setMonth(date1.getMonth() + 4)); 
+            console.log (deadline)
+
         }
 
         if (diffDays >= 120 && diffDays <150) {
 
             console.log ('2st extension')
+            deadline = new Date(date1.setMonth(date1.getMonth() + 5)); 
+            console.log (deadline)
+
         }
 
         if (diffDays >= 150 && diffDays <180) {
 
             console.log ('3rd extension')
+            deadline = new Date(date1.setMonth(date1.getMonth() + 6)); 
+            console.log (deadline)
+
+        }
+
+        if (diffDays >= 180) {
+
+            console.log ('Deadline missed')
+            deadline = datenow; 
+            console.log (deadline)
+
+
         }
 
 
@@ -213,7 +232,7 @@ function putApplication(item, index) {
             '     </tr>  ' +
             '     <tr width="80%">  ' +
             '       <th width="50%">' + '<div>' + lastEvent + '  |  ' + item['applId'] + '</div>' + '</th>  ' +
-            '       <th width="50%">Deadline 2: ' + datenow + ' days</th>  ' +
+            '       <th width="50%">Deadline: ' + deadline + ' in ' + diffDays + ' days</th>  ' +
             '     </tr>' +
             '   </table></div>';
         setButton.id = index;
