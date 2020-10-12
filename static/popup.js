@@ -214,7 +214,7 @@ function putApplication(item, index) {
             '     </tr>  ' +
             '     <tr width="80%">  ' +
             '       <th width="50%">' + '<div>' + lastEvent + '  |  ' + item['applId'] + '</div>' + '</th>  ' +
-            '       <th width="50%">Deadline 2: ' + date6 + ' days</th>  ' +
+            '       <th width="50%">Deadline 2: ' + datenow - date1 + ' days</th>  ' +
             '     </tr>' +
             '   </table></div>';
         setButton.id = index;
