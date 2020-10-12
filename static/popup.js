@@ -172,7 +172,7 @@ function putApplication(item, index) {
 
         console.log(lastEvent.replace(/-/g, "/"))
         var date1 = new Date(lastEvent.replace(/-/g, "/"));
-        date1 = new Date(date1.setMonth(date1.getMonth() + 6));
+        date1 = new Date(date1.setMonth(date1.getMonth()));
 
         date3 = new Date(date1.setMonth(date1.getMonth() + 3));
         date4 = new Date(date1.setMonth(date1.getMonth() + 4));
@@ -181,6 +181,10 @@ function putApplication(item, index) {
 
         var datenow = new Date();
         var diffDays = parseInt((datenow - date1) / (1000 * 60 * 60 * 24), 10);
+        console.log ("difference between now and office action")
+        console.log (parseInt(datenow - date1))
+        console.log (parseInt(datenow - date1) / (1000 * 60 * 60 * 24), 10)
+
 
         if (parseInt((datenow - date3) / (1000 * 60 * 60 * 24), 10) >0) {
 
@@ -210,7 +214,7 @@ function putApplication(item, index) {
             '     </tr>  ' +
             '     <tr width="80%">  ' +
             '       <th width="50%">' + '<div>' + lastEvent + '  |  ' + item['applId'] + '</div>' + '</th>  ' +
-            '       <th width="50%">Deadline 2: ' + datenow + ' days</th>  ' +
+            '       <th width="50%">Deadline 2: ' + date6 + ' days</th>  ' +
             '     </tr>' +
             '   </table></div>';
         setButton.id = index;
