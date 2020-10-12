@@ -184,25 +184,26 @@ function putApplication(item, index) {
         console.log ("difference between now and office action")
         console.log (diffDays)
 
-        if (parseInt((datenow - date3) / (1000 * 60 * 60 * 24), 10) >0) {
+        if (diffDays > 0 && diffDays <90) {
 
             console.log ('no extension')
         }
 
-        if (parseInt((datenow - date4) / (1000 * 60 * 60 * 24), 10) >0) {
+        if (diffDays >= 90 && diffDays <120) {
 
             console.log ('1st extension')
         }
 
-        if (parseInt((datenow - date5) / (1000 * 60 * 60 * 24), 10) >0) {
+        if (diffDays >= 120 && diffDays <150) {
 
-            console.log ('2nd extension')
+            console.log ('2st extension')
         }
 
-        if (parseInt((datenow - date6) / (1000 * 60 * 60 * 24), 10) >0) {
+        if (diffDays >= 150 && diffDays <180) {
 
-            console.log ('3nd extension')
+            console.log ('3rd extension')
         }
+
 
         var setButton = document.createElement("small");
         setButton.innerHTML = '<div class="header2" width="80px">  <table >  ' +
