@@ -173,8 +173,35 @@ function putApplication(item, index) {
         console.log(lastEvent.replace(/-/g, "/"))
         var date1 = new Date(lastEvent.replace(/-/g, "/"));
         date1 = new Date(date1.setMonth(date1.getMonth() + 6));
-        var date2 = new Date();
-        var diffDays = parseInt((date1 - date2) / (1000 * 60 * 60 * 24), 10);
+
+        date3 = new Date(date1.setMonth(date1.getMonth() + 3));
+        date4 = new Date(date1.setMonth(date1.getMonth() + 4));
+        date5 = new Date(date1.setMonth(date1.getMonth() + 5));
+        date6 = new Date(date1.setMonth(date1.getMonth() + 6));
+
+        var datenow = new Date();
+        var diffDays = parseInt((datenow - date1) / (1000 * 60 * 60 * 24), 10);
+
+        if (parseInt((datenow - date3) / (1000 * 60 * 60 * 24), 10) >0) {
+
+            console.log ('no extension')
+        }
+
+        if (parseInt((datenow - date4) / (1000 * 60 * 60 * 24), 10) >0) {
+
+            console.log ('1st extension')
+        }
+
+        if (parseInt((datenow - date5) / (1000 * 60 * 60 * 24), 10) >0) {
+
+            console.log ('2nd extension')
+        }
+
+        if (parseInt((datenow - date6) / (1000 * 60 * 60 * 24), 10) >0) {
+
+            console.log ('3nd extension')
+        }
+
         var setButton = document.createElement("small");
         setButton.innerHTML = '<div class="header2" width="80px">  <table >  ' +
             '     <tr width="80%">  ' +
@@ -183,7 +210,7 @@ function putApplication(item, index) {
             '     </tr>  ' +
             '     <tr width="80%">  ' +
             '       <th width="50%">' + '<div>' + lastEvent + '  |  ' + item['applId'] + '</div>' + '</th>  ' +
-            '       <th width="50%">Deadline: ' + diffDays + ' days</th>  ' +
+            '       <th width="50%">Deadline: ' + date1 + ' days</th>  ' +
             '     </tr>' +
             '   </table></div>';
         setButton.id = index;
