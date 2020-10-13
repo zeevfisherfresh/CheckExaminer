@@ -158,7 +158,7 @@ function putApplication(item, index) {
     for (var i = transactions.length - 1; i >= 0; --i) {
         let transaction = (transactions[i]);
         console.log(transaction['recordDate'])
-        if (transaction['code'] == 'MCTFR' || transaction['code'] == 'MCTFR') {
+        if (transaction['code'] == 'MCTFR' || transaction['code'] == 'MCTNF') {
             lastEvent = transaction['recordDate'].substring(0, 11);
             description = transaction['description']
         }
