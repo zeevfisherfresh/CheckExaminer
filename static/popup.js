@@ -180,19 +180,20 @@ function putApplication(item, index) {
         
         var datenow = new Date();
         var deadline = date1;
+        var extension;
         var diffDays = parseInt((date1 - datenow) / (1000 * 60 * 60 * 24), 10);
         console.log ("difference between now and office action")
         console.log (diffDays)
 
         if (diffDays > 0 && diffDays <90) {
-            console.log ('no extension');
+            extension = "";
             deadline = new Date(date1.setMonth(date1.getMonth() + 3)); 
             console.log (deadline)
         }
 
         if (diffDays >= 90 && diffDays <120) {
 
-            console.log ('1st extension')
+            extension = "1st extension";
             deadline = new Date(date1.setMonth(date1.getMonth() + 4)); 
             console.log (deadline)
 
@@ -200,7 +201,7 @@ function putApplication(item, index) {
 
         if (diffDays >= 120 && diffDays <150) {
 
-            console.log ('2st extension')
+            extension = "2nd extension";
             deadline = new Date(date1.setMonth(date1.getMonth() + 5)); 
             console.log (deadline)
 
@@ -208,7 +209,7 @@ function putApplication(item, index) {
 
         if (diffDays >= 150 && diffDays <180) {
 
-            console.log ('3rd extension')
+            extension = "3rd extension";
             deadline = new Date(date1.setMonth(date1.getMonth() + 6)); 
             console.log (deadline)
 
@@ -216,7 +217,7 @@ function putApplication(item, index) {
 
         if (diffDays >= 180) {
 
-            console.log ('Deadline missed')
+            extension = "Deadline missed";
             deadline = datenow; 
             console.log (deadline)
 
@@ -236,7 +237,7 @@ function putApplication(item, index) {
             '       <th width="50%"> Deadline: ' + description + '</th>  ' +
             '     </tr>  ' +
             '     <tr width="80%">  ' +
-            '       <th width="50%">' + '<div>' + lastEvent + '  |  ' + item['applId'] + '</div>' + '</th>  ' +
+            '       <th width="50%">' + '<div>' + lastEvent + '  |  ' + item['applId'] + '  |  ' + '</div><div color=red>' + extension + '</div></th>  ' +
             '       <th width="50%">Deadline: ' + deadline + ' in ' + diffDays + ' days</th>  ' +
             '     </tr>' +
             '   </table></div>';
