@@ -227,7 +227,7 @@ function putApplication(item, index) {
         var setButton = document.createElement("small");
         setButton.innerHTML = '<div class="header2" width="80px">  <table >  ' +
             '     <tr width="80%">  ' +
-            '       <th width="50%"><div>' + item['patentTitle'] + '</div></th>  ' +
+            '       <th width="50%"><div>' + name + item['patentTitle'] + '</div></th>  ' +
             '       <th width="50%"> Deadline: ' + description + '</th>  ' +
             '     </tr>  ' +
             '     <tr width="80%">  ' +
