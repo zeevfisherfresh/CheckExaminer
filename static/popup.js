@@ -173,13 +173,9 @@ function putApplication(item, index) {
         console.log(lastEvent.replace(/-/g, "/"))
         var date1 = new Date(lastEvent.replace(/-/g, "/"));
         //date1 = new Date(date1.setMonth(date1.getMonth() + 6));
-        date3 = new Date(date1.setMonth(date1.getMonth() + 3));
-        date4 = new Date(date1.setMonth(date1.getMonth() + 4));
-        date5 = new Date(date1.setMonth(date1.getMonth() + 5));
-        date6 = new Date(date1.setMonth(date1.getMonth() + 6));
         
         var datenow = new Date();
-        var deadline = date1;
+        var deadline;
         var extension;
         var diffDays = parseInt((date1 - datenow) / (1000 * 60 * 60 * 24), 10);
         console.log ("difference between now and office action")
@@ -204,7 +200,6 @@ function putApplication(item, index) {
             extension = "2nd extension";
             deadline = new Date(date1.setMonth(date1.getMonth() + 5)); 
             console.log (deadline)
-
         }
 
         if (diffDays >= 150 && diffDays <180) {
