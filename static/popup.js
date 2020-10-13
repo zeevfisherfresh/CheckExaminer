@@ -179,7 +179,7 @@ function putApplication(item, index) {
         date6 = new Date(date1.setMonth(date1.getMonth() + 6));
         
         var datenow = new Date();
-        var deadline = new date1();
+        var deadline = date1;
         var diffDays = parseInt((date1 - datenow) / (1000 * 60 * 60 * 24), 10);
         console.log ("difference between now and office action")
         console.log (diffDays)
