@@ -62,7 +62,9 @@ def get_examiner():
         ## Initializing the mongo connection
     examiner_name = request.args['name']
     return jsonify(hello_world(examiner_name))
-
+@app.route('/')
+def hello_world():
+    return send_from_directory('static', 'index.html')
 # index route, shows index.html view
 @app.route('/application')
 def index():
@@ -293,7 +295,7 @@ def get_apps():
 
     page = int(request.args.get('page', 0))
 
-    data = '{"searchText":"firstNamedApplicant:(' + name + ')","fl":"*","mm":"100%","df":"patentTitle","qf":"firstNamedApplicant ","facet":"false","sort":"applId asc","start":"' + str(page * 20) + '"}'
+    data = '{"searchText":"firstNamedApplicant:(' + name + ')","fl":"*","mm":"100%","df":"patentTitle","qf":"firstNamedApplicant ","facet":"false","sort":"lastUpdatedTimestamp desc","start":"' + str(page * 20) + '"}'
     print(data)
     return jsonify(requests.post('https://ped.uspto.gov/api/queries', headers=headers, data=data).json())
 
@@ -309,6 +311,6 @@ def get_apps_by_id():
 
     page = int(request.args.get('page', 0))
 
-    data = '{"searchText":"applId:(' + name + ')","fl":"applId patentTitle firstNamedApplicant appExamName","mm":"100%","df":"patentTitle","qf":"applId","facet":"false","sort":"applId asc","start":"' + str(page * 20) + '"}'
+    data = '{"searchText":"applId:(' + name + ')","fl":"applId patentTitle firstNamedApplicant appExamName","mm":"100%","df":"patentTitle","qf":"applId","facet":"false","sort":"lastUpdatedTimestamp desc","start":"' + str(page * 20) + '"}'
     print(data)
     return jsonify(requests.post('https://ped.uspto.gov/api/queries', headers=headers, data=data).json())
