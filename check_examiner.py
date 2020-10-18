@@ -295,8 +295,9 @@ def get_apps():
 
     page = int(request.args.get('page', 0))
 
-    data = '{"searchText":"firstNamedApplicant:(' + name + ')","fl":"*","mm":"100%","df":"patentTitle","qf":"firstNamedApplicant ","facet":"false","sort":"appStatusDate desc","start":"' + str(page * 20) + '"}'
+    data = '{"searchText":"firstNamedApplicant:(' + name + ')","fl":"*", "fq" : ["appStatus:\\\"Final Rejection Mailed\\\",\\\"Non Final Action Mailed\\\""],"mm":"100%","df":"patentTitle","qf":"firstNamedApplicant ","facet":"false","sort":"appStatusDate desc","start":"' + str(page * 20) + '"}'
     print(data)
+    print(requests.post('https://ped.uspto.gov/api/queries', headers=headers, data=data))
     return jsonify(requests.post('https://ped.uspto.gov/api/queries', headers=headers, data=data).json())
 
 @app.route('/get_apps_by_id')
