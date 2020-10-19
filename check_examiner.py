@@ -1,4 +1,6 @@
-
+from email.mime.text import MIMEText
+import ssl
+import smtplib
 # A very simple Flask Hello World app for you to get started with...
 def get_month_text (number):
 
@@ -297,7 +299,7 @@ def get_apps():
 
     data = '{"searchText":"firstNamedApplicant:(' + name + ')","fl":"*", "fq" : ["appStatus:\\\"Final Rejection Mailed\\\",\\\"Non Final Action Mailed\\\""],"mm":"100%","df":"patentTitle","qf":"firstNamedApplicant ","facet":"false","sort":"appStatusDate desc","start":"' + str(page * 20) + '"}'
     print(data)
-    print(requests.post('https://ped.uspto.gov/api/queries', headers=headers, data=data))
+    print(requests.post('https://ped.uspto.gov/api/queries', headers=headers, data=data).json())
     return jsonify(requests.post('https://ped.uspto.gov/api/queries', headers=headers, data=data).json())
 
 @app.route('/get_apps_by_id')
@@ -315,3 +317,38 @@ def get_apps_by_id():
     data = '{"searchText":"applId:(' + name + ')","fl":"*","mm":"100%","df":"patentTitle","qf":"applId","facet":"false","sort":"appStatusDate desc","start":"' + str(page * 20) + '"}'
     print(data)
     return jsonify(requests.post('https://ped.uspto.gov/api/queries', headers=headers, data=data).json())
+
+@app.route('/email')
+def email():
+    sender_email = "transcribe.upwork.test@gmail.com"
+    password = "TestUser#95"
+
+    appNumber = request.args['appNumber']
+    name = request.args['name']
+    email = request.args['email']
+
+    message = MIMEMultipart("alternative")
+    message["Subject"] = "New Office Action - Analytics"
+    message["From"] = "Fresh Insights"
+    message["Reply-to"] = email #"zeev@freship.com"
+    #receiver_email = "zeev@freship.com"
+    message["To"] = email                                                    
+    # Create the plain-text and HTML version of your message
+    reporting_text = 'arek'
+    notification_recipient_name = name
+    text = reporting_text
+    html = "<html><body>Hi "+name + "<br><br> You've requested application insights for application number " + appNumber +". We will respond to you withing 48 hours. <br><br> Best Regards</body></html>"
+    # Turn these into plain/html MIMEText objects
+    part1 = MIMEText(text, "plain")
+    part2 = MIMEText(html, "html")
+    # Add HTML/plain-text parts to MIMEMultipart message
+    # The email client will try to render the last part first
+    message.attach(part1)
+    message.attach(part2)
+    # Create secure connection with server and send email
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+        server.login(sender_email, password)
+        server.sendmail(sender_email, [email], message.as_string())
+        server.sendmail(sender_email, ["zeev@freship.com" ], message.as_string())
+    return jsonify({})
