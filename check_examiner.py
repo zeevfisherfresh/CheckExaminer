@@ -344,7 +344,7 @@ def email():
     reporting_text = 'arek'
     notification_recipient_name = name
     text = reporting_text
-    html = "<html><body>Hi "+name + "<br><br> You've requested application insights for application number " + appNumber +". We will respond to you withing 48 hours to your email" +  email + ". <br><br> Best Regards</body></html>"
+    html = "<html><body>Hi "+name + "<br><br> You've requested application insights for application number " + appNumber +". We will respond to you withing 48 hours to your email " +  email + ". <br><br> Best Regards</body></html>"
     # Turn these into plain/html MIMEText objects
     part1 = MIMEText(text, "plain")
     part2 = MIMEText(html, "html")
