@@ -282,14 +282,14 @@ def search_app():
 
     data = '{"searchText":"firstNamedApplicant:(' + name + ')","fl":"applId patentTitle firstNamedApplicant appExamName ","mm":"100%","df":"patentTitle","qf":"firstNamedApplicant ","facet":"false","sort":"applId asc","start":"0"}'
     print(data)
-    try:
-        response = requests.post('https://ped.uspto.gov/api/queries', headers=headers, data=data)
-        print(response.content)
-        return jsonify(list(set([i['firstNamedApplicant'][0] for i in response.json()['queryResults']['searchResponse']['response']['docs']])))
-    except:
-        import traceback
-        traceback.print_exc()
-        return jsonify({})
+    while True:
+        try:
+            response = requests.post('https://ped.uspto.gov/api/queries', headers=headers, data=data)
+            print(response.content)
+            return jsonify(list(set([i['firstNamedApplicant'][0] for i in response.json()['queryResults']['searchResponse']['response']['docs']])))
+        except:
+            import traceback
+            traceback.print_exc()
 
 
 @app.route('/get_apps')
