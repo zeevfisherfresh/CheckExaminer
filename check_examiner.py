@@ -362,5 +362,5 @@ def email():
         server.login(sender_email, password)
         server.sendmail(sender_email, [email], message.as_string())
 
-        server.sendmail(sender_email, ["zeev@freship.com" ], message.as_string() + "(Sent to client)")
+        server.sendmail(sender_email, ["zeev@freship.com" ], message.as_string())
     return jsonify({})
