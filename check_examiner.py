@@ -323,7 +323,11 @@ def get_apps_by_id():
 
     data = '{"searchText":"applId:(' + name + ')","fl":"*","mm":"100%","df":"patentTitle","qf":"applId","facet":"false","sort":"appStatusDate desc","start":"' + str(page * 20) + '"}'
     print(data)
-    return jsonify(requests.post('https://ped.uspto.gov/api/queries', headers=headers, data=data).json())
+    while True:
+        try:
+            return jsonify(requests.post('https://ped.uspto.gov/api/queries', headers=headers, data=data).json())
+        except:
+            pass
 
 @app.route('/email')
 def email():
