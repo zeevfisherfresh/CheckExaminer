@@ -1,6 +1,16 @@
 from email.mime.text import MIMEText
 import ssl
 import smtplib
+import psycopg2
+import requests
+import base64
+import csv, json, sys
+import optparse
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
+APPS_TO_ANALYSE = 1000
+executor = ThreadPoolExecutor(max_workers=10)
+
 # A very simple Flask Hello World app for you to get started with...
 def get_month_text (number):
 
@@ -363,3 +373,288 @@ def email():
         server.sendmail(sender_email, [email], message.as_string())
         server.sendmail(sender_email, ["zeev@freship.com" ], message.as_string())
     return jsonify({})
+
+def get_cache_no(element):
+    try:
+        return json.load(open(element.replace('/','') + ".txt", "r"))
+    except:
+        return {}
+
+def get_cache(element):
+    try:
+        return json.load(open(element.replace('/','') + ".txt", "r"))
+    except:
+        result = {}
+        result['timestamp'] = datetime.datetime.now().timestamp()
+        write_cache(element, result)
+        return {}
+
+def write_cache(key, result):
+    with open(key.replace('/','')  + '.txt', 'w') as outfile:
+        result['timestamp'] = datetime.datetime.now().timestamp()
+        json.dump(result, outfile)
+
+def fetch_patent(patent):
+    classes = []
+    #print('Fetching patent', patent)
+    fetched = False
+    creds = base64.b64encode("VkIikoJMeoJKLPGGgAUWMl324QD81x8O:3TzRhnYc6ezNptjA".encode())
+    headers = {'Authorization': 'Basic ' + creds.decode('UTF-8'), 'Content-Type': 'application/x-www-form-urlencoded'}
+    url = 'https://ops.epo.org/3.2/auth/accesstoken'
+    data = {"grant_type": "client_credentials"}
+
+    response = requests.post(url, headers=headers, data=data)
+
+    myToken = response.json()["access_token"]
+
+    header = {'Authorization': "Bearer " + myToken}
+    from random import randint
+    from time import sleep
+    while not fetched:
+        try:
+            import urllib.parse
+
+            myUrl = 'http://ops.epo.org/rest-services/published-data/search/abstract,biblio,full-cycle?q=num%3D' + patent + '&Range=1-100'
+            response = requests.get(myUrl, headers=header)
+            #print('resp', response.text)
+            fetched = True
+            import xmltodict, json
+            o = xmltodict.parse(response.text)
+            #print(response.text)
+            biblio_data = o['ops:world-patent-data']['ops:biblio-search']['ops:search-result']['exchange-documents'][0]['exchange-document']['bibliographic-data']
+            pub_data = biblio_data['publication-reference']
+            try:
+                for ex_doc in o['ops:world-patent-data']['ops:biblio-search']['ops:search-result']['exchange-documents']:
+                    try:
+                        print('Fetching claims for ', ex_doc['exchange-document']['@country'], ex_doc['exchange-document']['@doc-number'])
+                        myUrl = 'http://ops.epo.org/3.2/rest-services/published-data/publication/epodoc/'+ex_doc['exchange-document']['@country']+ ex_doc['exchange-document']['@doc-number']+'/claims'
+                        response = requests.get(myUrl, headers=header)
+                        fetched = True
+                        import xmltodict, json
+                        claims = xmltodict.parse(response.text)
+                        #print('Claims:')
+                        #for i in claims['ops:world-patent-data']['ftxt:fulltext-documents']['ftxt:fulltext-document']['claims']['claim']['claim-text']:
+                        #    print(i)
+                    except:
+                        pass
+            except Exception as e:
+                print(e)
+                pass
+            #try:
+            #    print('Patent title', o['ops:world-patent-data']['ops:biblio-search']['ops:search-result']['exchange-documents'][0]['exchange-document']['bibliographic-data']['invention-title']['#text'])
+            #except:
+            #    print('Patent title:', o['ops:world-patent-data']['exchange-documents']['exchange-document']['bibliographic-data']['invention-title']['#text'])
+            try:
+                for cl in (biblio_data['classifications-ipcr']['classification-ipcr']):
+                    x = ((cl['text']))
+                    x = "".join(x.split('   ')[:3])
+                    classes = classes + [x.replace(' ', '')]
+            except:
+                x = ((biblio_data['classifications-ipcr']['classification-ipcr']['text']))
+                x = "".join(x.split('   ')[:3])
+                classes = classes + [x.replace(' ', '')]
+            return classes
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            print('Exception when fetching patent ',e)
+            pass
+
+@app.route('/split')
+def split():
+    patent_number = request.args['patent_number']
+    applicant = request.args['applicant']
+    classes = fetch_patent(patent_number)
+    executor.submit(get_split, patent_number, applicant)
+    res = {}
+    for cl in classes + [applicant]:
+        res[cl] = get_cache_no(cl)
+    print(res)
+    import json
+    return res
+
+
+@app.route('/subscribe')
+def subscribe():
+    email = request.args['email']
+    company = request.args['company']
+
+    try:
+        conn = psycopg2.connect(host='ec2-34-231-56-78.compute-1.amazonaws.com',
+                                             database='d4g1rkpppj5adf',
+                                             user='igsgvulkrsftdl',
+                                             port=5432,
+                                             password='a25b712e2b4fadaa145685d089fead23e8e3d53fa45425312e98cf1c8a1dcbe9')
+        # create a cursor
+        cur = conn.cursor()
+        
+    # execute a statement
+        print("INSERT INTO schedules (company, email) VALUES (%s, %s)" % (company, email))
+        cur.execute("INSERT INTO schedules (company, email) VALUES ('%s', '%s')" % (company, email))
+        # display the PostgreSQL database server version
+       
+    # close the communication with the PostgreSQL
+        conn.commit()
+        conn.close()
+
+    except Error as e:
+        print("Error while connecting to MySQL", e)
+    return jsonify({})
+
+def get_split(patent_number, applicant):
+    print(patent_number, applicant)
+    classes = []
+
+    from datetime import timedelta, date, datetime
+
+    url = 'https://ops.epo.org/3.2/auth/accesstoken'
+    data = {"grant_type": "client_credentials"}
+
+    creds = base64.b64encode("VkIikoJMeoJKLPGGgAUWMl324QD81x8O:3TzRhnYc6ezNptjA".encode())
+    headers = {'Authorization': 'Basic ' + creds.decode('UTF-8'), 'Content-Type': 'application/x-www-form-urlencoded'}
+
+    response = requests.post(url, headers=headers, data=data)
+
+    myToken = response.json()["access_token"]
+
+    header = {'Authorization': "Bearer " + myToken}
+
+    WINDOW = 1000
+
+    def daterange(start_date, n):
+        return start_date - timedelta(days=(n))
+
+    def fetch_apps(idx, WINDOW):
+        if(idx.strftime("%Y%m%d") < '19800101'):
+            return
+        fetched = False
+        from random import randint
+        from time import sleep
+        sleep(randint(0,5))
+        print(query)
+        while not fetched:
+            try:
+                print('Fetching applications for date range:', idx.strftime("%Y%m%d")+"-"+daterange(idx, WINDOW - 1).strftime("%Y%m%d"))
+                myUrl = 'http://ops.epo.org/rest-services/published-data/search/abstract,biblio,full-cycle?q=' + query + 'pd%3D'+idx.strftime("%Y%m%d")+"-"+daterange(idx, WINDOW - 1).strftime("%Y%m%d")+'&Range=1-100'
+                response = requests.get(myUrl, headers=header)
+                import xmltodict, json
+                o = xmltodict.parse(response.text)
+                #print(response.text)
+                if 'fault' in o:
+                    if(o['fault']['code'] == 'CLIENT.RobotDetected'):
+                        print('Throttled by EPO')
+                        raise "oops"
+                    if(o['fault']['code'] == 'SERVER.EntityNotFound'):
+                        fetched = True
+                        print('No applications were filed in daterange ', idx.strftime("%Y%m%d")+"-"+daterange(idx, WINDOW - 1).strftime("%Y%m%d"))
+                        break
+                if 'ops:world-patent-data' in o:
+                    try:
+                        total_records = int(o['ops:world-patent-data']['ops:biblio-search']['@total-result-count'])
+                        begin = idx.strftime("%Y%m%d")
+                        end = daterange(idx, WINDOW - 1).strftime("%Y%m%d")
+                        print("In this daterange", idx.strftime("%Y%m%d")+"-"+daterange(idx, WINDOW - 1).strftime("%Y%m%d"), 'we have this many records', total_records)
+                        print(begin, end, begin > end)
+                        if(total_records > 100 and begin > end and int(begin) - int(end) > 5):
+                            print("WARNING: For interval", idx,'-', daterange(idx, WINDOW - 1), 'we have more than 100, namely',total_records, '. EPO Api only returns first 100 for a given query so we disregarded', total_records - 100, 'in calculations. Choosing smaller window.')
+                            fetch_apps(idx, WINDOW/2)
+                            if len(all_apps) < APPS_TO_ANALYSE:
+                                fetch_apps(daterange(idx, WINDOW/2), WINDOW/2)
+                            fetched = True
+                        else:
+                            reg_doc = o['ops:world-patent-data']['ops:biblio-search']['ops:search-result']['exchange-documents']
+                            try:
+                                if(reg_doc.keys()):
+                                    all_apps.append(reg_doc)
+                            except:
+                                try:
+                                    for datum in (o['ops:world-patent-data']['ops:biblio-search']['ops:search-result']['exchange-documents']):
+                                        all_apps.append(datum)
+                                except:
+                                    pass
+                            fetched = True
+
+                    except Exception as e:
+                        import time
+                        interval = randint(30,60)
+                        import traceback
+                        traceback.print_exc()
+                        print("Exception: ", e, o, ' waiting',interval,' seconds to retry')
+                        time.sleep(interval)
+            except Exception as e:
+                import time
+                interval = randint(30,60)
+                print("Exception: ", e, ' waiting',interval,' seconds to retry')
+                time.sleep(interval)
+
+
+    start_date = date(2013, 1, 1)
+    end_date = date(2015, 6, 2)
+    i = 0
+    date = datetime.now()
+    all_apps = []
+    results = []
+    def to_infinity():
+        index = 0
+        while len(all_apps) < APPS_TO_ANALYSE:
+            yield index
+            index += 1
+        raise "Ooops"
+    NUM_OF_THREADS = 10
+    delta = NUM_OF_THREADS
+    classes = fetch_patent(patent_number)
+    classes = [applicant] + classes
+    for cl in classes:
+        res = get_cache(cl)
+        if 'timestamp' in res and datetime.now().timestamp() - float(res['timestamp']) < 3600:
+            continue
+        all_apps = []
+        print('Fetching split for classification',cl)
+        cl.replace(' ', '')
+        print()
+        if '/' in str(cl):
+            try:
+                query = 'ic%3D' + cl[:cl.find('/')]+","
+            except:
+                query = 'ic%3D' + cl['text'][:cl['text'].find('/')]+","
+        else:
+            query = 'pa%3D' + cl + ','
+        print(query)
+        while len(all_apps) < APPS_TO_ANALYSE and date.strftime("%Y%m%d") > '19800101':
+            try:
+                fetch_apps(date, delta * WINDOW)
+                delta += NUM_OF_THREADS
+                date = daterange(date, WINDOW)
+                print('Fetched up to day ', date, len(all_apps), ' records analysed so far')
+            except KeyboardInterrupt:
+                break
+        families = []
+        count = {}
+        count_all = 0
+        all_apps = all_apps[:APPS_TO_ANALYSE]
+        for app in all_apps:
+            family = app['exchange-document']
+            if family not in families:
+                for idx in 'exchange-document.bibliographic-data.publication-reference.document-id.country'.split('.'):
+                    try:
+                        app = app[idx]
+                    except:
+                        app = app[0][idx]
+                if app not in count:
+                    count[app] = 0
+                count[app] = count[app] + 1
+                count_all += 1
+                families += [family]
+            else:
+                pass
+
+        print('SPLIT PER COUNTRY for classification', cl, ':')
+        try:
+            for key in count:
+                res[key] = count[key]*100.0/count_all
+            write_cache(cl, res)
+        except:
+            import traceback
+            traceback.print_exc()
+
+
