@@ -358,7 +358,7 @@ def email():
     reporting_text = 'arek'
     notification_recipient_name = name
     text = reporting_text
-    html = "<html><body>Hi "+name + "<br><br> You've requested application insights for application number " + appNumber +". We will respond to you withing 48 hours to your email " +  email + ". <br><br> Best Regards</body></html>"
+    html = "<html><body>Hi "+name + "<br><br> You've requested application insights for application number " + appNumber +". We will aim to revert to you within 48 hours to " +  email + ". <br><br> Best Regards, <br>The Fresh Team</body></html>"
     # Turn these into plain/html MIMEText objects
     part1 = MIMEText(text, "plain")
     part2 = MIMEText(html, "html")
@@ -371,6 +371,7 @@ def email():
     with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
         server.login(sender_email, password)
         server.sendmail(sender_email, [email], message.as_string())
+
         server.sendmail(sender_email, ["zeev@freship.com" ], message.as_string())
     return jsonify({})
 
