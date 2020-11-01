@@ -8,6 +8,9 @@ import csv, json, sys
 import optparse
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
+from datetime import date
+from dateutil.relativedelta import relativedelta
+
 APPS_TO_ANALYSE = 1000
 executor = ThreadPoolExecutor(max_workers=10)
 
@@ -281,7 +284,7 @@ def get_names():
     return jsonify([(i['examiner']) for i in examiners_collection.find()])
 
 @app.route('/search_app')
-def search_app():
+def search_app_endpoint():
     ## Initializing the mongo connection
     import requests
 
@@ -289,6 +292,18 @@ def search_app():
         'Content-type': 'application/json',
     }
     name = request.args['name']
+
+    return jsonify(search_app(name))
+
+
+
+def search_app(name):
+    ## Initializing the mongo connection
+    import requests
+
+    headers = {
+        'Content-type': 'application/json',
+    }
 
     data = '{"searchText":"firstNamedApplicant:(' + name + ')","fl":"applId patentTitle firstNamedApplicant appExamName ","mm":"100%","df":"patentTitle","qf":"firstNamedApplicant ","facet":"false","sort":"applId asc","start":"0"}'
     print(data)
@@ -296,14 +311,14 @@ def search_app():
         try:
             response = requests.post('https://ped.uspto.gov/api/queries', headers=headers, data=data)
             print(response.content)
-            return jsonify(list(set([i['firstNamedApplicant'][0] for i in response.json()['queryResults']['searchResponse']['response']['docs']])))
+            return (list(set([i['firstNamedApplicant'][0] for i in response.json()['queryResults']['searchResponse']['response']['docs']])))
         except:
             import traceback
             traceback.print_exc()
 
 
 @app.route('/get_apps')
-def get_apps():
+def get_apps_endpoint():
     ## Initializing the mongo connection
     import requests
 
@@ -311,13 +326,102 @@ def get_apps():
         'Content-type': 'application/json',
     }
     name = request.args['name']
-
     page = int(request.args.get('page', 0))
 
-    data = '{"searchText":"firstNamedApplicant:(' + name + ')","fl":"*", "fq" : ["appStatus:\\\"Final Rejection Mailed\\\",\\\"Non Final Action Mailed\\\""],"mm":"100%","df":"patentTitle","qf":"firstNamedApplicant ","facet":"false","sort":"appStatusDate desc","start":"' + str(page * 20) + '"}'
-    print(data)
-    print(requests.post('https://ped.uspto.gov/api/queries', headers=headers, data=data).json())
-    return jsonify(requests.post('https://ped.uspto.gov/api/queries', headers=headers, data=data).json())
+    return jsonify(get_apps(name, page))
+
+def get_apps(name, page):
+    ## Initializing the mongo connection
+    import requests
+
+    headers = {
+        'Content-type': 'application/json',
+    }
+
+    data = '{"searchText":"firstNamedApplicant:(' + name + ')","fl":"*","mm":"100%","df":"patentTitle","qf":"firstNamedApplicant ","facet":"false","sort":"appStatusDate desc","start":"' + str(page * 20) + '"}'
+    return (requests.post('https://ped.uspto.gov/api/queries', headers=headers, data=data).json())
+
+@app.route('/get_deadline')
+def get_deadlines():
+    ## Initializing the mongo connection
+    import requests
+
+    for row in get_rows():
+        html = "<html><body>Hi, The Fresh Team send you the following report for company " + row[0] + "<br/>"
+        tuples = []
+        headers = {
+            'Content-type': 'application/json',
+        }
+
+        applicants = (search_app(row[0]))
+        analyzed = []
+        print(applicants)
+        for applicant in applicants:
+            applicant = applicant.strip()
+            for i in range(0, 4):
+                applications = get_apps(applicant, i)['queryResults']['searchResponse']['response']['docs']
+                print(applicant, len(applications))
+                for item in applications:
+                    print('-----')
+                    if 'transactions' in item:
+                        transactions = item['transactions']
+                        description = ''
+                        lastEvent = ''
+                        for i in reversed(range(len(transactions))):
+                            transaction = (transactions[i]);
+                            if (transaction['code'] == 'MCTFR' or transaction['code'] == 'MCTNF'):
+                                lastEvent = transaction['recordDate'][:11]
+                                description = transaction['description']
+                                if(transaction['code'] == 'MCTFR'):
+                                    description = 'Final Rejection'
+                                else:
+                                    description = 'Non-Final Rejection' 
+                            if (transaction['code'] == 'A.NE' or transaction['code'] == 'SA..' or transaction['code'] == 'A.QU'):
+                                lastEvent = ''
+                                description = ''
+                        if lastEvent:
+                            deadline = datetime.datetime(int(lastEvent.split('-')[0]), int(lastEvent.split('-')[1]), int(lastEvent.split('-')[2]))
+                            today = datetime.datetime.now()
+                            diffDays = (today - deadline).days
+                            print(item['applId'], lastEvent, diffDays)
+                            if (diffDays < 0):
+                                extension = "Deadline in the past!";
+                                deadline = datetime.datetime(int(lastEvent.split('-')[0]), int(lastEvent.split('-')[1]), int(lastEvent.split('-')[2])); 
+
+                            if (diffDays > 0 and diffDays <90):
+                                extension = "No extension period";
+                                deadline = datetime.datetime(int(lastEvent.split('-')[0]), int(lastEvent.split('-')[1]), int(lastEvent.split('-')[2])) + relativedelta(months=3)
+                            if (diffDays >= 90 and diffDays <120):
+
+                                extension = "1st extension";
+                                deadline = datetime.datetime(int(lastEvent.split('-')[0]), int(lastEvent.split('-')[1]), int(lastEvent.split('-')[2])) + relativedelta(months=4)
+
+                            if (diffDays >= 120 and diffDays <150):
+
+                                extension = "2nd extension";
+                                deadline = datetime.datetime(int(lastEvent.split('-')[0]), int(lastEvent.split('-')[1]), int(lastEvent.split('-')[2])) + relativedelta(months=5)
+
+                            if (diffDays >= 150 and diffDays <180):
+
+                                extension = "3rd extension";
+                                deadline = datetime.datetime(int(lastEvent.split('-')[0]), int(lastEvent.split('-')[1]), int(lastEvent.split('-')[2])) + relativedelta(months=6)
+
+
+                            if (diffDays >= 180) :
+
+                                extension = "";
+                            if item['applId'] not in analyzed:
+                                analyzed += [item['applId']]
+                                if (diffDays < 180):
+                                    tuples += [((deadline - today).days,"%s application nears deadline %s in %s days with extension %s  for applicant %s<br/>" % (item['applId'], deadline, (deadline - today).days, extension, applicant))]
+        tuples = sorted(tuples, key=lambda x: x[0])
+        html += "\n".join([i[1] for i in tuples])
+        html += "</body></html>"
+        send_email(row[1], html, "Weekly report of deadlines for company "+row[0])
+
+            
+
+    
 
 @app.route('/get_apps_by_id')
 def get_apps_by_id():
@@ -348,31 +452,32 @@ def email():
     name = request.args['name']
     email = request.args['email']
 
+    html = "<html><body>Hi "+name + "<br><br> You've requested application insights for application number " + appNumber +". We will aim to revert to you within 48 hours to " +  email + ". <br><br> Best Regards, <br>The Fresh Team</body></html>"
+
+    send_email(email, html, "New Office Action - Analytics")
+    send_email(email, html, "New Office Action - Analytics")
+    return jsonify({})
+
+def send_email(email, html, subject):
+    sender_email = "transcribe.upwork.test@gmail.com"
+    password = "TestUser#95"
+
     message = MIMEMultipart("alternative")
-    message["Subject"] = "New Office Action - Analytics"
+    message["Subject"] = subject
     message["From"] = "Fresh Insights"
     message["Reply-to"] = email #"zeev@freship.com"
     #receiver_email = "zeev@freship.com"
-    message["To"] = email                                                    
-    # Create the plain-text and HTML version of your message
-    reporting_text = 'arek'
-    notification_recipient_name = name
-    text = reporting_text
-    html = "<html><body>Hi "+name + "<br><br> You've requested application insights for application number " + appNumber +". We will aim to revert to you within 48 hours to " +  email + ". <br><br> Best Regards, <br>The Fresh Team</body></html>"
+    message["To"] = email          
     # Turn these into plain/html MIMEText objects
-    part1 = MIMEText(text, "plain")
     part2 = MIMEText(html, "html")
     # Add HTML/plain-text parts to MIMEMultipart message
     # The email client will try to render the last part first
-    message.attach(part1)
     message.attach(part2)
     # Create secure connection with server and send email
     context = ssl.create_default_context()
     with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
         server.login(sender_email, password)
         server.sendmail(sender_email, [email], message.as_string())
-
-        server.sendmail(sender_email, ["zeev@freship.com" ], message.as_string())
     return jsonify({})
 
 def get_cache_no(element):
@@ -500,6 +605,68 @@ def subscribe():
 
     except Error as e:
         print("Error while connecting to MySQL", e)
+    html = "<html><body>Hi,<br><br> You've subscribed to being alerted of upcoming deadlines for application for " + company +". You will henceforth receive the reports every Monday. Click this <a href='http://localhost:8000/unsubscribe?email=" + email + "&company=" + company + "' > link </a> to unsubscribe.</body></html>"
+
+    send_email(email, html, "Deadline subscription notice")
+    return jsonify({})
+
+
+@app.route('/unsubscribe')
+def unsubscribe():
+    email = request.args['email']
+    company = request.args['company']
+
+    try:
+        conn = psycopg2.connect(host='ec2-34-231-56-78.compute-1.amazonaws.com',
+                                             database='d4g1rkpppj5adf',
+                                             user='igsgvulkrsftdl',
+                                             port=5432,
+                                             password='a25b712e2b4fadaa145685d089fead23e8e3d53fa45425312e98cf1c8a1dcbe9')
+        # create a cursor
+        cur = conn.cursor()
+        
+    # execute a statement
+        print("delete from schedules where company=\'%s\'' and email=\'%s\';" % (company, email))
+        cur.execute("delete from schedules where company=\'%s\' and email=\'%s\';" % (company, email))
+        # display the PostgreSQL database server version
+       
+    # close the communication with the PostgreSQL
+        conn.commit()
+        conn.close()
+
+    except Error as e:
+        print("Error while connecting to MySQL", e)
+    html = "<html><body>Hi,<br><br> You've unsubscribed to being alerted of upcoming deadlines for application for " + company +". You will henceforth not receive the reports every Monday. </body></html>"
+
+    send_email(email, html, "Deadline unsubscription notice")
+    return jsonify("Successfuly unscubscribed!")
+
+
+def get_rows():
+
+    try:
+        conn = psycopg2.connect(host='ec2-34-231-56-78.compute-1.amazonaws.com',
+                                             database='d4g1rkpppj5adf',
+                                             user='igsgvulkrsftdl',
+                                             port=5432,
+                                             password='a25b712e2b4fadaa145685d089fead23e8e3d53fa45425312e98cf1c8a1dcbe9')
+        # create a cursor
+        cur = conn.cursor()
+        
+    # execute a statement
+        print("select * from schedules;")
+        cur.execute("select * from schedules;")
+        # display the PostgreSQL database server version
+        rows = cur.fetchall() 
+       
+    # close the communication with the PostgreSQL
+        conn.commit()
+        conn.close()
+        return rows
+
+    except Error as e:
+        print("Error while connecting to MySQL", e)
+
     return jsonify({})
 
 def get_split(patent_number, applicant):
