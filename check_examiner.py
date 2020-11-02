@@ -417,14 +417,13 @@ def get_deadlines():
         tuples = sorted(tuples, key=lambda x: x[0])
         html = '<p style="text-align:center;color:blue;font-weight: bold;">Fresh weekly alert</p>' + \
             '<b> Hello</b>, <br> <br>'+ \
-            'You have  an alert setup to track U.S. office actions for company <span style="color:orange;font-weight: bold;">%s</span>. <br/> <br/>'+ \
-            'This week we\'ve identified that there are <span style="text-align:center;color:blue;font-weight: bold;">%s pending office actions</span>'+ \
+            'You have  an alert setup to track U.S. office actions for company <span style="color:orange;font-weight: bold;"> ' + row[0] + '</span>. <br/> <br/>'+ \
+            'This week we\'ve identified that there are <span style="text-align:center;color:blue;font-weight: bold;">' + row[0] + ' pending office actions</span>'+ \
             '<p style="text-align:center;color:blue;font-weight: bold;"></p>'+ \
-            'You can stop tracking %s at any time by clicking here'+ \
-            '<p style="color:blue;font-weight: bold;">Best, <br>'+ \
+            "Click this <a href='https://checkexaminer.herokuapp.com/unsubscribe?email=" + row[1] + "&company=" + row[0] + "' > link </a> to unsubscribe." \
+            "<p style='color:blue;font-weight: bold;'>Best, <br>"+ \
             'your Fresh Team</p>' 
         html += "<br/> <img src='cid:image1'></body></html>"
-        html = html % (str(row[0]), str(len(tuples)), str(row[0]))
         send_email_with_image(row[1], html, "Weekly report of deadlines for company "+row[0])
     return jsonify({})
 
@@ -666,8 +665,8 @@ def unsubscribe():
         cur = conn.cursor()
         
     # execute a statement
-        print("delete from schedules where company=\'%s\'' and email=\'%s\';" % (company, email))
-        cur.execute("delete from schedules where company=\'%s\' and email=\'%s\';" % (company, email))
+        print("delete from schedules where company=\'%s\' and email=\'%s\';" % (company, email))
+        cur.execute("delete from schedules where company like \'\%%s\%\' and email=\'\%%s\%\';" % (company, email))
         # display the PostgreSQL database server version
        
     # close the communication with the PostgreSQL
