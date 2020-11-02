@@ -665,8 +665,8 @@ def unsubscribe():
         cur = conn.cursor()
         
     # execute a statement
-        print("delete from schedules where company=\'%s\' and email=\'%s\';" % (company, email))
-        cur.execute("delete from schedules where company like \'\%%s\%\' and email=\'\%%s\%\';" % (company, email))
+        print("delete from schedules where company like '%" + company+"%' and email='" + email+"%';" )
+        cur.execute("delete from schedules where company like '%" + company+"%' and email like'%" + email+ "%';" )
         # display the PostgreSQL database server version
        
     # close the communication with the PostgreSQL
