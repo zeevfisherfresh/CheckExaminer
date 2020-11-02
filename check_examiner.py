@@ -426,6 +426,7 @@ def get_deadlines():
         html += "<br/> <img src='cid:image1'></body></html>"
         html = html % (str(row[0]), str(len(tuples)), str(row[0]))
         send_email_with_image(row[1], html, "Weekly report of deadlines for company "+row[0])
+    return jsonify({})
 
             
 
