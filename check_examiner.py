@@ -10,6 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from datetime import date
 from dateutil.relativedelta import relativedelta
+from email.mime.image import MIMEImage
 
 APPS_TO_ANALYSE = 1000
 executor = ThreadPoolExecutor(max_workers=10)
@@ -347,7 +348,6 @@ def get_deadlines():
     import requests
 
     for row in get_rows():
-        html = "<html><body>Hi, The Fresh Team send you the following report for company " + row[0] + "<br/>"
         tuples = []
         headers = {
             'Content-type': 'application/json',
@@ -415,9 +415,17 @@ def get_deadlines():
                                 if (diffDays < 180):
                                     tuples += [((deadline - today).days,"%s application nears deadline %s in %s days with extension %s  for applicant %s<br/>" % (item['applId'], deadline, (deadline - today).days, extension, applicant))]
         tuples = sorted(tuples, key=lambda x: x[0])
-        html += "\n".join([i[1] for i in tuples])
-        html += "</body></html>"
-        send_email(row[1], html, "Weekly report of deadlines for company "+row[0])
+        html = '<p style="text-align:center;color:blue;font-weight: bold;">Fresh weekly alert</p>' + \
+            '<b> Hello</b>, <br> <br>'+ \
+            'You have  an alert setup to track U.S. office actions for company <span style="color:orange;font-weight: bold;">%s</span>. <br/> <br/>'+ \
+            'This week we\'ve identified that there are <span style="text-align:center;color:blue;font-weight: bold;">%s pending office actions</span>'+ \
+            '<p style="text-align:center;color:blue;font-weight: bold;"></p>'+ \
+            'You can stop tracking %s at any time by clicking here'+ \
+            '<p style="color:blue;font-weight: bold;">Best, <br>'+ \
+            'your Fresh Team</p>' 
+        html += "<br/> <img src='cid:image1'></body></html>"
+        html = html % (str(row[0]), str(len(tuples)), str(row[0]))
+        send_email_with_image(row[1], html, "Weekly report of deadlines for company "+row[0])
 
             
 
@@ -473,6 +481,37 @@ def send_email(email, html, subject):
     # Add HTML/plain-text parts to MIMEMultipart message
     # The email client will try to render the last part first
     message.attach(part2)
+    # Create secure connection with server and send email
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+        server.login(sender_email, password)
+        server.sendmail(sender_email, [email], message.as_string())
+    return jsonify({})
+
+def send_email_with_image(email, html, subject):
+    sender_email = "transcribe.upwork.test@gmail.com"
+    password = "TestUser#95"
+
+    message = MIMEMultipart("alternative")
+    message["Subject"] = subject
+    message["From"] = "Fresh Insights"
+    message["Reply-to"] = email #"zeev@freship.com"
+    #receiver_email = "zeev@freship.com"
+    message["To"] = email          
+    # Turn these into plain/html MIMEText objects
+    part2 = MIMEText(html, "html")
+    # Add HTML/plain-text parts to MIMEMultipart message
+    # The email client will try to render the last part first
+    message.attach(part2)
+
+    fp = open('logo.png', 'rb')
+    msgImage = MIMEImage(fp.read())
+    fp.close()
+
+    # Define the image's ID as referenced above
+    msgImage.add_header('Content-ID', '<image1>')
+    message.attach(msgImage)
+
     # Create secure connection with server and send email
     context = ssl.create_default_context()
     with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
@@ -605,9 +644,9 @@ def subscribe():
 
     except Error as e:
         print("Error while connecting to MySQL", e)
-    html = "<html><body>Hi,<br><br> You've subscribed to being alerted of upcoming deadlines for application for " + company +". You will henceforth receive the reports every Monday. Click this <a href='http://localhost:8000/unsubscribe?email=" + email + "&company=" + company + "' > link </a> to unsubscribe.</body></html>"
+    html = "<html><body>Hi,<br><br> You've subscribed to being alerted of upcoming deadlines for application for " + company +". You will henceforth receive the reports every Monday. Click this <a href='https://checkexaminer.herokuapp.com/unsubscribe?email=" + email + "&company=" + company + "' > link </a> to unsubscribe. <br/> <img src='cid:image1'></body></html>"
 
-    send_email(email, html, "Deadline subscription notice")
+    send_email_with_image(email, html, "Deadline subscription notice")
     return jsonify({})
 
 
@@ -636,9 +675,9 @@ def unsubscribe():
 
     except Error as e:
         print("Error while connecting to MySQL", e)
-    html = "<html><body>Hi,<br><br> You've unsubscribed to being alerted of upcoming deadlines for application for " + company +". You will henceforth not receive the reports every Monday. </body></html>"
+    html = "<html><body>Hi,<br><br> You've unsubscribed to being alerted of upcoming deadlines for application for " + company +". You will henceforth not receive the reports every Monday. <br/><img src='cid:image1'></body></html>"
 
-    send_email(email, html, "Deadline unsubscription notice")
+    send_email_with_image(email, html, "Deadline unsubscription notice")
     return jsonify("Successfuly unscubscribed!")
 
 
