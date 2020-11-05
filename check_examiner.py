@@ -463,7 +463,9 @@ def email():
 
 def send_email(email, html, subject):
     sender_email = "transcribe.upwork.test@gmail.com"
+    sender_email = "freshipinsights@gmail.com"
     password = "TestUser#95"
+    password = "freship14insights"        
 
     message = MIMEMultipart("alternative")
     message["Subject"] = subject
@@ -485,7 +487,9 @@ def send_email(email, html, subject):
 
 def send_email_with_image(email, html, subject):
     sender_email = "transcribe.upwork.test@gmail.com"
+    sender_email = "freshipinsights@gmail.com"
     password = "TestUser#95"
+    password = "freship14insights"        
 
     message = MIMEMultipart("alternative")
     message["Subject"] = subject
