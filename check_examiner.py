@@ -447,7 +447,9 @@ def get_apps_by_id():
 @app.route('/email')
 def email():
     sender_email = "transcribe.upwork.test@gmail.com"
+    sender_email = "freshipinsights@gmail.com"
     password = "TestUser#95"
+    password = "freship14insights"        
 
     appNumber = request.args['appNumber']
     name = request.args['name']
