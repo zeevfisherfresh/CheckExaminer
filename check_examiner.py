@@ -488,7 +488,8 @@ def send_email_with_image(email, html, subject):
     message = MIMEMultipart("alternative")
     message["Subject"] = subject
     message["From"] = "Fresh Insights"
-    message["Reply-to"] = email #"zeev@freship.com"
+    message["Reply-to"] = "noreply@freship.io"
+    message["bcc"] = "zeev@freship.com"
     #receiver_email = "zeev@freship.com"
     message["To"] = email          
     # Turn these into plain/html MIMEText objects
@@ -638,7 +639,7 @@ def subscribe():
 
     except Error as e:
         print("Error while connecting to MySQL", e)
-    html = "<html><body>Hi,<br><br> You've subscribed to being alerted of upcoming deadlines for application for " + company +". You will henceforth receive the reports every Monday. Click this <a href='https://checkexaminer.herokuapp.com/unsubscribe?email=" + email + "&company=" + company + "' > link </a> to unsubscribe. <br/> <img src='cid:image1'></body></html>"
+    html = "<html><body>Congratulations! <br><br> You will now receive weekly alerts of upcoming deadlines for application for " + company +". All being well, you will receive a report every Monday if there are pending deadlines. Click this <a href='https://checkexaminer.herokuapp.com/unsubscribe?email=" + email + "&company=" + company + "' > link </a> to unsubscribe. <br/> <img src='cid:image1'></body></html>"
 
     send_email_with_image(email, html, "Deadline subscription notice")
     return jsonify({})
