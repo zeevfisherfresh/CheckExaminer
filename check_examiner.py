@@ -410,8 +410,8 @@ def get_deadlines():
                             if (diffDays >= 180) :
 
                                 extension = "";
-                            if item['applId'] not in analyzed:
-                                analyzed += [item['applId']]
+                            if item['patentTitle'] not in analyzed:
+                                analyzed += [item['patentTitle']]
                                 if (diffDays < 180):
                                     tuples += [((deadline - today).days,"%s application nears deadline %s in %s days with extension %s  for applicant %s<br/>" % (item['applId'], deadline, (deadline - today).days, extension, applicant))]
         tuples = sorted(tuples, key=lambda x: x[0])
