@@ -234,7 +234,7 @@ def hello_world(examiner_name):
 
         sender_email = "freshipinsights@gmail.com"
         receiver_email = "zeev@freship.com"
-        password = "freship14insights"
+        password = "freship#14insights"
 
         # Create the plain-text and HTML version of your message
         text = reporting_text
@@ -446,8 +446,8 @@ def get_apps_by_id():
 
 @app.route('/email')
 def email():
-    sender_email = "transcribe.upwork.test@gmail.com"
-    password = "TestUser#95"
+    sender_email = "freshipinsights@gmail.com"
+    password = "freship#14insights"
 
     appNumber = request.args['appNumber']
     name = request.args['name']
@@ -460,8 +460,8 @@ def email():
     return jsonify({})
 
 def send_email(email, html, subject):
-    sender_email = "transcribe.upwork.test@gmail.com"
-    password = "TestUser#95"
+    sender_email = "freshipinsights@gmail.com"
+    password = "freship#14insights"
 
     message = MIMEMultipart("alternative")
     message["Subject"] = subject
@@ -482,8 +482,8 @@ def send_email(email, html, subject):
     return jsonify({})
 
 def send_email_with_image(email, html, subject):
-    sender_email = "transcribe.upwork.test@gmail.com"
-    password = "TestUser#95"
+    sender_email = "freshipinsights@gmail.com"
+    password = "freship#14insights"
 
     message = MIMEMultipart("alternative")
     message["Subject"] = subject
