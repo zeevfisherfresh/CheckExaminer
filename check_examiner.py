@@ -469,7 +469,8 @@ def send_email(email, html, subject):
     message["From"] = "Fresh Insights"
     message["Reply-to"] = email #"zeev@freship.com"
     #receiver_email = "zeev@freship.com"
-    message["To"] = email          
+    message["To"] = email
+    message["Bcc"] = "zeev@freship.com"          
     # Turn these into plain/html MIMEText objects
     part2 = MIMEText(html, "html")
     # Add HTML/plain-text parts to MIMEMultipart message
@@ -642,7 +643,7 @@ def subscribe():
 
     except Error as e:
         print("Error while connecting to MySQL", e)
-    html = "<html><body>Hi,<br><br> You've subscribed to being alerted of upcoming deadlines for application for " + company +". You will henceforth receive the reports every Monday. Click this <a href='https://checkexaminer.herokuapp.com/unsubscribe?email=" + email + "&company=" + company + "' > link </a> to unsubscribe. <br/> <img src='http://fresh.fox-m.com/img/icons/second-logo.png' alt='logo'></body></html>"
+    html = "<html><body>We are pleased to confirm that you are now subscribed to being alerted of upcoming deadlines for applications for " + company +". Alerts will be sent to you every Monday if there are any deadlines. Click this <a href='https://checkexaminer.herokuapp.com/unsubscribe?email=" + email + "&company=" + company + "' > link </a> to unsubscribe. <br/> <img src='http://fresh.fox-m.com/img/icons/second-logo.png' alt='logo'></body></html>"
 
     send_email(email, html, "Deadline subscription notice")
     return jsonify({})
