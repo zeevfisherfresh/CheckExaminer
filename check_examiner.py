@@ -11,8 +11,10 @@ from datetime import datetime
 from datetime import date
 from dateutil.relativedelta import relativedelta
 from email.mime.image import MIMEImage
+import calendar
+import get_split
 
-APPS_TO_ANALYSE = 1000
+APPS_TO_ANALYSE = 90
 executor = ThreadPoolExecutor(max_workers=10)
 
 # A very simple Flask Hello World app for you to get started with...
@@ -610,7 +612,10 @@ def split():
     import json
     return res
 
-
+@app.route('/split_pa')
+def split_pa():
+    patent = request.args['patent']
+    return jsonify(get_split.get_split(patent))
 @app.route('/subscribe')
 def subscribe():
     email = request.args['email']
@@ -701,7 +706,21 @@ def get_rows():
 
     return jsonify({})
 
-def get_split(patent_number, applicant):
+import requests
+from lxml.html import fromstring
+def get_proxies():
+    url = 'https://free-proxy-list.net/'
+    response = requests.get(url)
+    parser = fromstring(response.text)
+    proxies = []
+    for i in parser.xpath('//tbody/tr')[:10]:
+        if i.xpath('.//td[7][contains(text(),"yes")]'):
+            #Grabbing IP and corresponding PORT
+            proxy = ":".join([i.xpath('.//td[1]/text()')[0], i.xpath('.//td[2]/text()')[0]])
+            proxies.add(proxy)
+    return proxies
+
+def g(patent_number, applicant):
     print(patent_number, applicant)
     classes = []
 
@@ -722,6 +741,7 @@ def get_split(patent_number, applicant):
     WINDOW = 1000
 
     def daterange(start_date, n):
+        print(start_date, n, start_date- timedelta(days=(n)))
         return start_date - timedelta(days=(n))
 
     def fetch_apps(idx, WINDOW):
@@ -734,29 +754,33 @@ def get_split(patent_number, applicant):
         print(query)
         while not fetched:
             try:
-                print('Fetching applications for date range:', idx.strftime("%Y%m%d")+"-"+daterange(idx, WINDOW - 1).strftime("%Y%m%d"))
+                print('Fetching applications for date range:', idx.strftime("%Y%m%d")+"-"+daterange(idx, WINDOW - 1).strftime("%Y%m%d"), query)
                 myUrl = 'http://ops.epo.org/rest-services/published-data/search/abstract,biblio,full-cycle?q=' + query + 'pd%3D'+idx.strftime("%Y%m%d")+"-"+daterange(idx, WINDOW - 1).strftime("%Y%m%d")+'&Range=1-100'
-                response = requests.get(myUrl, headers=header)
+                import time
+                proxies = get_proxies()
+                print(proxies)
+                response = requests.get(myUrl, headers=header, proxies={"http": '139.5.132.245', "https": '139.5.132.245'})
                 import xmltodict, json
                 o = xmltodict.parse(response.text)
                 #print(response.text)
                 if 'fault' in o:
                     if(o['fault']['code'] == 'CLIENT.RobotDetected'):
-                        print('Throttled by EPO')
+                        print('Throttled by EPO', query)
                         raise "oops"
                     if(o['fault']['code'] == 'SERVER.EntityNotFound'):
                         fetched = True
-                        print('No applications were filed in daterange ', idx.strftime("%Y%m%d")+"-"+daterange(idx, WINDOW - 1).strftime("%Y%m%d"))
+                        print('No applications were filed in daterange ', idx.strftime("%Y%m%d")+"-"+daterange(idx, WINDOW - 1).strftime("%Y%m%d"), query)
                         break
                 if 'ops:world-patent-data' in o:
                     try:
                         total_records = int(o['ops:world-patent-data']['ops:biblio-search']['@total-result-count'])
                         begin = idx.strftime("%Y%m%d")
                         end = daterange(idx, WINDOW - 1).strftime("%Y%m%d")
-                        print("In this daterange", idx.strftime("%Y%m%d")+"-"+daterange(idx, WINDOW - 1).strftime("%Y%m%d"), 'we have this many records', total_records)
-                        print(begin, end, begin > end)
-                        if(total_records > 100 and begin > end and int(begin) - int(end) > 5):
-                            print("WARNING: For interval", idx,'-', daterange(idx, WINDOW - 1), 'we have more than 100, namely',total_records, '. EPO Api only returns first 100 for a given query so we disregarded', total_records - 100, 'in calculations. Choosing smaller window.')
+                        print("In this daterange", idx.strftime("%Y%m%d")+"-"+daterange(idx, WINDOW - 1).strftime("%Y%m%d"), 'we have this many records', total_records, query)
+                        print(begin, end, begin > end, query)
+                        if(#total_records > 100 and and int(begin) - int(end) > 5
+                            begin > end ):
+                            print("WARNING: For interval", idx,'-', daterange(idx, WINDOW - 1), 'we have more than 100, namely',total_records, '. EPO Api only returns first 100 for a given query so we disregarded', total_records - 100, 'in calculations. Choosing smaller window.', query)
                             fetch_apps(idx, WINDOW/2)
                             if len(all_apps) < APPS_TO_ANALYSE:
                                 fetch_apps(daterange(idx, WINDOW/2), WINDOW/2)
@@ -776,16 +800,16 @@ def get_split(patent_number, applicant):
 
                     except Exception as e:
                         import time
-                        interval = randint(30,60)
+                        interval = randint(0,10)
                         import traceback
                         traceback.print_exc()
-                        print("Exception: ", e, o, ' waiting',interval,' seconds to retry')
+                        print("Exception: ", e, o, ' waiting',interval,' seconds to retry', query)
                         time.sleep(interval)
             except Exception as e:
                 import time
-                interval = randint(30,60)
-                print("Exception: ", e, ' waiting',interval,' seconds to retry')
-                time.sleep(interval)
+                interval = randint(10,20)
+                print("Exception: ", e, ' waiting',interval,' seconds to retry', query)
+                time.sleep(randint(10,20))
 
 
     start_date = date(2013, 1, 1)
@@ -857,4 +881,188 @@ def get_split(patent_number, applicant):
             import traceback
             traceback.print_exc()
 
+def add_months(sourcedate, months):
+     month = sourcedate.month - 1 + months
+     year = sourcedate.year + month // 12
+     month = month % 12 + 1
+     day = min(sourcedate.day, calendar.monthrange(year,month)[1])
+     return datetime.date(year, month, day)
+
+@app.route('/fp')
+def fp():
+#from datetime import timedelta, date, datetime
+    patent = request.args['patent']
+
+    url = 'https://ops.epo.org/3.2/auth/accesstoken'
+    data = {"grant_type": "client_credentials"}
+
+    creds = base64.b64encode("VkIikoJMeoJKLPGGgAUWMl324QD81x8O:3TzRhnYc6ezNptjA".encode())
+    headers = {'Authorization': 'Basic ' + creds.decode('UTF-8'), 'Content-Type': 'application/x-www-form-urlencoded'}
+
+    response = requests.post(url, headers=headers, data=data)
+
+    myToken = response.json()["access_token"]
+
+    header = {'Authorization': "Bearer " + myToken}
+    classes = []
+    print('Fetching patent', patent)
+    fetched = False
+    from random import randint
+    from time import sleep
+    while not fetched:
+        try:
+            myUrl = 'http://ops.epo.org/rest-services/published-data/publication/epodoc/' + patent
+            response = requests.get(myUrl, headers=header)
+            fetched = True
+            import xmltodict, json
+            application = xmltodict.parse(response.text).get("ops:world-patent-data").get("exchange-documents").get("exchange-document")
+            bibliographic_data = application.get("bibliographic-data")
+
+            application_reference = str(bibliographic_data.get("application-reference").get("document-id")[1].get("doc-number"))
+            application_reference = "PCT/" + application_reference[6:8] + application_reference[2:6] + "/" + "0" + application_reference[8:]
+            priority_claims = bibliographic_data.get("priority-claims").get("priority-claim")
+            try: 
+               for k in range (0,len(priority_claims)):
+            # #        print (priority_claims)
+            # #        priority_claim=priority_claims[0].get("document-id")
+                if "document-id" in priority_claims:
+                   priority_claim=priority_claims.get("document-id")
+                else:    
+                   priority_claim=priority_claims[0].get("document-id")
+      
+                for l in range (0,len(priority_claim)):
+                   priority_claim_type = priority_claim[l]
+                   if "date" in priority_claim_type:
+                     earliest_priority = priority_claim_type.get("date")
+                     earliest_priority_year = int(earliest_priority[0:4])
+                     earliest_priority_month = int(earliest_priority[4:6])
+                     earliest_priority_day = int(earliest_priority[6:8])
+                     earliest_priority = datetime.date(earliest_priority_year,earliest_priority_month,earliest_priority_day)                     
+                     first_deadline_30 = add_months(earliest_priority,30)
+
+            except KeyError:
+                print ("error")
+
+            
+            applicant = bibliographic_data.get("parties").get("applicants").get("applicant")[0].get("applicant-name").get("name")
+
+            first_inventor = bibliographic_data.get("parties").get("inventors").get("inventor")[0].get("inventor-name").get("name")
+            title = bibliographic_data.get("invention-title")[1].get("#text")
+
+            print (application_reference + "," + applicant + "," + str(earliest_priority) + "," + str(first_deadline_30) + "," + title)
+
+            try:
+                for classifications in bibliographic_data.get("classifications-ipcr").get("classification-ipcr"):
+                    class_text = ((classifications['text']))
+                    class_text = "".join(class_text.split('   ')[:3])
+                    classes = classes + [class_text.replace(' ', '')]
+            except:
+                class_text = bibliographic_data.get("classifications-ipcr").get("classification-ipcr").get("text")
+                class_text = "".join(class_text.split('   ')[:3])
+                classes = classes + [class_text.replace(' ', '')]
+
+            print (classes)
+            # CPC translation to words is somewhere here: https://publication.epo.org/raw-data/product?productId=71
+
+        except Exception as e:
+            print('Exception when fetching patent ',e)
+            pass
+
+    print('now fetching claims', patent)
+    fetched = False
+    while not fetched:
+        try:
+            myUrl = 'http://ops.epo.org/rest-services/published-data/publication/epodoc/' + patent + "/claims"
+            response = requests.get(myUrl, headers=header)
+            fetched = True
+            claims = xmltodict.parse(response.text).get("ops:world-patent-data").get("ftxt:fulltext-documents").get("ftxt:fulltext-document").get("claims").get("claim").get("claim-text")
+            
+            num_of_words_in_claims = len(claims.split())
+            claims = claims.split('\n')
+            claims_num=0
+            independent_claims = 0
+            for i in range (0,len(claims)):
+                if (claims[i][0] == "1" or claims[i][0]=="2" or claims[i][0]=="3" or claims[i][0]=="4" or claims[i][0]=="5" or claims[i][0]=="6" or claims[i][0]=="7" or claims[i][0]=="8" or claims[i][0]=="9"):  #if the paragraph doesn't start with a number, it is not a claim and shouldn't be counted.
+                    claims_num=claims_num+1
+                    if "claim" not in claims[i]:
+                        independent_claims = independent_claims + 1
+
+        except Exception as e:
+            print('Exception when fetching patent ',e)
+            pass
+
+    print (claims_num)
+    print (independent_claims)
+
+    print('now fetching description', patent)
+    fetched = False
+    while not fetched:
+        try:
+            myUrl = 'http://ops.epo.org/rest-services/published-data/publication/epodoc/' + patent + "/description"
+            response = requests.get(myUrl, headers=header)
+            fetched = True
+            description = xmltodict.parse(response.text).get("ops:world-patent-data").get("ftxt:fulltext-documents").get("ftxt:fulltext-document").get("description").get("p")
+            description = str(description)
+            num_of_words_in_description = len(description.split())
+        except Exception as e:
+            print('Exception when fetching patent ',e)
+            pass
+
+    print('now fetching pages and images', patent)
+    fetched = False
+    while not fetched:
+        try:
+            myUrl = 'http://ops.epo.org/rest-services/published-data/publication/epodoc/' + patent + ".A1/images"
+            response = requests.get(myUrl, headers=header)
+            fetched = True
+            images_data = xmltodict.parse(response.text).get("ops:world-patent-data").get("ops:document-inquiry").get("ops:inquiry-result").get("ops:document-instance")
+            total_p = 0
+            claims_p = 0
+            drawings_p = 0
+            description_p = 0
+            description_start_page = 0
+            description_end_page = 0
+            drawings_start_page = 0
+            drawings_end_page = 0
+            claims_start_page = 0
+            claims_end_page = 0
+            search_start_page = 0
+
+            for id in range (0,len(images_data)):
+                image_data = images_data[id]
+                if image_data.get("@desc")=="FullDocument":
+                    total_p = image_data.get("@number-of-pages")
+                                        
+                    image_data_doc_sections = image_data.get("ops:document-section")
+                    for dc in range (0,len(image_data_doc_sections)):
+                      doc_section = image_data_doc_sections[dc] 
+                      doc_section_name = doc_section.get("@name")
+                      if doc_section_name == "ABSTRACT":
+                         abstract_page = int(doc_section.get("@start-page"))  
+                      if doc_section_name == "CLAIMS":
+                          claims_start_page = int(doc_section.get("@start-page"))
+                          description_end_page = claims_start_page - 1     
+                      if doc_section_name == "DESCRIPTION":
+                          description_start_page = int(doc_section.get("@start-page"))
+                      if doc_section_name == "DRAWINGS":
+                          drawings_start_page = int(doc_section.get("@start-page"))
+                          claims_end_page = drawings_start_page - 1            
+                      if doc_section_name == "SEARCH_REPORT":
+                          search_start_page = int(doc_section.get("@start-page")) 
+                          drawings_end_page = search_start_page - 1 
+                
+            if search_start_page == 0:
+                    search_start_page = total_p
+                    drawings_end_page = search_start_page - 1
+            claims_p = claims_end_page - claims_start_page +1
+            description_p = description_end_page - description_start_page +1
+            drawings_p = drawings_end_page - drawings_start_page +1
+            total_words = num_of_words_in_description+num_of_words_in_claims
+
+        except Exception as e:
+            print('Exception when fetching patent ',e)
+            pass
+
+
+    return jsonify([total_words,num_of_words_in_claims,claims_num,independent_claims,title,applicant,first_inventor,str(first_deadline_30),classes,total_p, claims_p,drawings_p,description_p])
 
