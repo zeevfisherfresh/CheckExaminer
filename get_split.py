@@ -37,6 +37,7 @@ def get_split(pa):
     while 'Applicants – country' not in browser.page_source:
         pass
     print('Fetching split by country')
+    print(browser.page_source)
     done = False
     while not done:
         try:
