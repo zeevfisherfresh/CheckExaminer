@@ -34,6 +34,7 @@ def get_split(pa):
             l.click()
     print('Trigerring split by country')
     browser.save_screenshot("screenshot.png")
+    print(browser.page_source)
     while 'Applicants – country' not in browser.page_source:
         pass
     print('Fetching split by country')
