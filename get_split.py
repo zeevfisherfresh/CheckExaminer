@@ -25,6 +25,7 @@ def get_num(pa, country, browser):
     print('Waiting for filters')
     while 'My Espacenet' not in browser.page_source:
         pass
+    print(browser.page_source)
     while True:
         try:
             for l in browser.find_elements_by_tag_name("div"):
@@ -35,7 +36,7 @@ def get_num(pa, country, browser):
             print(e)
             pass
 
-def get_split(pa):
+def get_split(pa, country):
     options = Options()
     #options.add_argument("--headless")
     options.add_argument('--disable-gpu')
@@ -47,9 +48,4 @@ def get_split(pa):
       "safebrowsing.enabled": True
     })
     browser = webdriver.Chrome(options = options)
-    pairs = [[country, get_num(pa, country, browser)] for country in ['cn', 'ep', 'us']]
-    
-    summo = sum([i[1] for i in pairs])
-    pairs = [[i[0], i[1]*1.0/summo] for i in pairs]
-    browser.quit()
-    return pairs
+    return [country, get_num(pa, country, browser)]

@@ -616,7 +616,8 @@ def split():
 @app.route('/split_pa')
 def split_pa():
     patent = request.args['patent']
-    return jsonify(get_split.get_split(patent))
+    cn = request.args['country']
+    return jsonify(get_split.get_split(patent, cn))
 @app.route('/subscribe')
 def subscribe():
     email = request.args['email']
