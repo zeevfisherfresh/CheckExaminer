@@ -32,11 +32,11 @@ def get_split(pa):
     for l in browser.find_elements_by_tag_name("label"):
         if 'Filter' in l.text:
             l.click()
-    print('Getting split by country')
+    print('Trigerring split by country')
     browser.save_screenshot("screenshot.png")
-
     while 'Applicants – country' not in browser.page_source:
         pass
+    print('Fetching split by country')
     done = False
     while not done:
         try:
