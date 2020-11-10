@@ -11,9 +11,9 @@ from datetime import datetime, timedelta
 
 
 def get_num(pa, country, browser):
-    browser.get('https://www.croxyproxy.com/')
-    browser.find_element_by_id('url').send_keys("https://worldwide.espacenet.com/patent/search?f=publications.cc%3Ain%3D" + country + "&q=pa%3D%22" + pa + "%22")
-    browser.find_element_by_id('requestSubmit').click()
+    browser.get('http://fecc.me/')
+    browser.find_element_by_id('destination').send_keys("https://worldwide.espacenet.com/patent/search?f=publications.cc%3Ain%3D" + country + "&q=pa%3D%22" + pa + "%22")
+    browser.find_element_by_tag_name('button').click()
     import time
     #time.sleep(20)
     print('Connecting to espacenet')
