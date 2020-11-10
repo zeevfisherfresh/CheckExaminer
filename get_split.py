@@ -23,9 +23,9 @@ def get_num(pa, country, browser):
     #time.sleep(5)
     #print(browser.page_source)
     print('Waiting for filters')
+    print(browser.page_source)
     while 'My Espacenet' not in browser.page_source:
         pass
-    print(browser.page_source)
     while True:
         try:
             for l in browser.find_elements_by_tag_name("div"):
