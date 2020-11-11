@@ -17,7 +17,6 @@ def temp():
         'cart': '%5B%5D',
         'org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE': 'en_EP',
         'LevelXLastSelectedDataSource': 'EPODOC',
-        'JSESSIONID': 'RRVlhCQWw9gEYuHc+EU-VhGR.espacenet_levelx_prod_1',
         'splashPopup': '2020-06-30',
         'menuCurrentSearch': '%2F%2Fworldwide.espacenet.com%2FsearchResults%3FAB%3D%26AP%3D%26CPC%3D%26DB%3DEPODOC%26IC%3D%26IN%3D%26PA%3DIBM%26PD%3D%26PN%3D%26PR%3D%26ST%3Dadvanced%26Submit%3DSearch%26TI%3D%26locale%3Den_EP',
         'PGS': '10',
