@@ -1081,5 +1081,5 @@ def fp():
             pass
 
 
-    return jsonify([total_words,num_of_words_in_claims,claims_num,independent_claims,title,applicant,first_inventor,str(first_deadline_30),classes,total_p, claims_p,drawings_p,description_p])
+    return jsonify([total_words,num_of_words_in_claims,claims_num,independent_claims,title,applicant,first_inventor,str(first_deadline_30),classes,total_p, claims_p,drawings_p,description_p,application_reference])
 
