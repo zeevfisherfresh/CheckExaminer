@@ -9,13 +9,64 @@ import glob
 import pathlib
 from datetime import datetime, timedelta
 
+def temp():
+    import requests
+
+    cookies = {
+        'cpcops_settings': '%7B%22display_tree%22%3Atrue%2C%22show-2000-series%22%3A%22state-1%22%2C%22dateRange%22%3A%7B%22from%22%3A%7B%22month%22%3A10%2C%22year%22%3A2020%7D%2C%22to%22%3A%7B%22month%22%3A10%2C%22year%22%3A2020%7D%2C%22isRange%22%3Afalse%7D%7D',
+        'cart': '%5B%5D',
+        'org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE': 'en_EP',
+        'LevelXLastSelectedDataSource': 'EPODOC',
+        'JSESSIONID': 'RRVlhCQWw9gEYuHc+EU-VhGR.espacenet_levelx_prod_1',
+        'splashPopup': '2020-06-30',
+        'menuCurrentSearch': '%2F%2Fworldwide.espacenet.com%2FsearchResults%3FAB%3D%26AP%3D%26CPC%3D%26DB%3DEPODOC%26IC%3D%26IN%3D%26PA%3DIBM%26PD%3D%26PN%3D%26PR%3D%26ST%3Dadvanced%26Submit%3DSearch%26TI%3D%26locale%3Den_EP',
+        'PGS': '10',
+        'currentUrl': 'https%3A%2F%2Fworldwide.espacenet.com%2FadvancedSearch%3Flocale%3Den_EP',
+    }
+
+    headers = {
+        'Connection': 'keep-alive',
+        'sec-ch-ua': '"Chromium";v="86", "\\"Not\\\\A;Brand";v="99", "Google Chrome";v="86"',
+        'Accept': 'application/json,application/i18n+xml',
+        'X-EPO-PQL-Profile': 'cpci',
+        'EPO-Trace-Id': '0xmaa3-3y2aso-AAA-000001',
+        'sec-ch-ua-mobile': '?0',
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.183 Safari/537.36',
+        'Content-Type': 'application/json;charset=UTF-8',
+        'Origin': 'https://worldwide.espacenet.com',
+        'Sec-Fetch-Site': 'same-origin',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Dest': 'empty',
+        'Referer': 'https://worldwide.espacenet.com/patent/search?f=publications.pa_country%3Ain%3Dgb&q=pa%3D%22IBM%22',
+        'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
+    }
+
+    params = (
+        ('lang', 'en,de,fr'),
+        ('q', 'pa="IBM"'),
+        ('qlang', 'cql'),
+        ('p_s', 'espacenet'),
+        ('p_f', 'publications.pa_country:in=gb'),
+        ('p_q', 'pa="IBM"'),
+    )
+
+    data = '{"query":{"fields":["publications.ti_*","publications.abs_*","publications.pn_docdb","publications.in","publications.in_country","publications.pa","publications.pa_country","publications.pd","publications.pr_docdb","publications.app_fdate.untouched","publications.ipc","publications.ipc_ic","publications.ipc_icci","publications.ipc_iccn","publications.ipc_icai","publications.ipc_ican","publications.ci_cpci","publications.ca_cpci","publications.cl_cpci","biblio:pa;pa_orig;pa_unstd;in;in_orig;in_unstd;pa_country;in_country;pd;pn;allKindCodes;","oprid_full.untouched","opubd_full.untouched"],"from":0,"size":20,"highlighting":[{"field":"publications.ti_en","fragment_words_number":20,"number_of_fragments":3,"hits_only":true},{"field":"publications.abs_en","fragment_words_number":20,"number_of_fragments":3,"hits_only":true},{"field":"publications.ti_de","fragment_words_number":20,"number_of_fragments":3,"hits_only":true},{"field":"publications.abs_de","fragment_words_number":20,"number_of_fragments":3,"hits_only":true},{"field":"publications.ti_fr","fragment_words_number":20,"number_of_fragments":3,"hits_only":true},{"field":"publications.abs_fr","fragment_words_number":20,"number_of_fragments":3,"hits_only":true},{"field":"publications.pn","fragment_words_number":20,"number_of_fragments":3,"hits_only":true},{"field":"publications.pn_docdb","fragment_words_number":20,"number_of_fragments":3,"hits_only":true},{"field":"publications.pa","fragment_words_number":20,"number_of_fragments":3,"hits_only":true}]},"filters":{"publications.pa_country":[{"value":["gb"]}],"publications.patent":[{"value":["true"]}]},"widgets":{}}'
+
+    response = requests.post('https://worldwide.espacenet.com/3.2/rest-services/search', headers=headers, params=params, cookies=cookies, data=data)
+    return response.text
+
+#NB. Original query string below. It seems impossible to parse and
+#reproduce query strings 100% accurately so the one below is given
+#in case the reproduced version is not "correct".
+# response = requests.post('https://worldwide.espacenet.com/3.2/rest-services/search?lang=en%2Cde%2Cfr&q=pa%3D%22IBM%22&qlang=cql&p_s=espacenet&p_f=publications.pa_country%3Ain%3Dgb&p_q=pa%3D%22IBM%22', headers=headers, cookies=cookies, data=data)
+
+
 def get_split(pa):
     options = Options()
     #options.add_argument("--headless")
     options.add_argument('--disable-gpu')
     options.add_argument('--no-sandbox')
     #options.add_argument("--mute-audio")
-    options.add_argument('--user-agent="Mozilla/5.0 (Windows Phone 10.0; Android 4.2.1; Microsoft; Lumia 640 XL LTE) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Mobile Safari/537.36 Edge/12.10166"')
     options.add_experimental_option("prefs", {
       "download.prompt_for_download": False,
       "download.directory_upgrade": True,
@@ -36,7 +87,6 @@ def get_split(pa):
     print('Trigerring split by country')
     browser.save_screenshot("screenshot.png")
     while 'Applicants – country' not in browser.page_source:
-        print(browser.page_source)
         pass
     print('Fetching split by country')
     done = False

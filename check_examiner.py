@@ -469,8 +469,7 @@ def send_email(email, html, subject):
     message["From"] = "Fresh Insights"
     message["Reply-to"] = email #"zeev@freship.com"
     #receiver_email = "zeev@freship.com"
-    message["To"] = email
-    message["Bcc"] = "zeev@freship.com"          
+    message["To"] = email          
     # Turn these into plain/html MIMEText objects
     part2 = MIMEText(html, "html")
     # Add HTML/plain-text parts to MIMEMultipart message
@@ -518,6 +517,14 @@ def get_cache_no(element):
     try:
         return json.load(open(element.replace('/','') + ".txt", "r"))
     except:
+        return {}
+
+@app.route('/temp')
+def get_cache_no():
+    try:
+        return jsonify(get_split.temp())
+    except Exception as e:
+        print(e)
         return {}
 
 def get_cache(element):
@@ -613,10 +620,7 @@ def split():
     import json
     return res
 
-@app.route('/split_pa')
-def split_pa():
-    patent = request.args['patent']
-    return jsonify(get_split.get_split(patent))
+
 @app.route('/subscribe')
 def subscribe():
     email = request.args['email']
@@ -643,7 +647,7 @@ def subscribe():
 
     except Error as e:
         print("Error while connecting to MySQL", e)
-    html = "<html><body>We are pleased to confirm that you are now subscribed to being alerted of upcoming deadlines for applications for " + company +". Alerts will be sent to you every Monday if there are any deadlines. Click this <a href='https://checkexaminer.herokuapp.com/unsubscribe?email=" + email + "&company=" + company + "' > link </a> to unsubscribe. <br/> <img src='http://fresh.fox-m.com/img/icons/second-logo.png' alt='logo'></body></html>"
+    html = "<html><body>Hi,<br><br> You've subscribed to being alerted of upcoming deadlines for application for " + company +". You will henceforth receive the reports every Monday. Click this <a href='https://checkexaminer.herokuapp.com/unsubscribe?email=" + email + "&company=" + company + "' > link </a> to unsubscribe. <br/> <img src='http://fresh.fox-m.com/img/icons/second-logo.png' alt='logo'></body></html>"
 
     send_email(email, html, "Deadline subscription notice")
     return jsonify({})
@@ -713,7 +717,7 @@ def get_proxies():
     url = 'https://free-proxy-list.net/'
     response = requests.get(url)
     parser = fromstring(response.text)
-    proxies = []
+    proxies = set()
     for i in parser.xpath('//tbody/tr')[:10]:
         if i.xpath('.//td[7][contains(text(),"yes")]'):
             #Grabbing IP and corresponding PORT
@@ -721,7 +725,7 @@ def get_proxies():
             proxies.add(proxy)
     return proxies
 
-def g(patent_number, applicant):
+def get_splito(patent_number, applicant):
     print(patent_number, applicant)
     classes = []
 
@@ -759,8 +763,8 @@ def g(patent_number, applicant):
                 myUrl = 'http://ops.epo.org/rest-services/published-data/search/abstract,biblio,full-cycle?q=' + query + 'pd%3D'+idx.strftime("%Y%m%d")+"-"+daterange(idx, WINDOW - 1).strftime("%Y%m%d")+'&Range=1-100'
                 import time
                 proxies = get_proxies()
-                print(proxies)
-                response = requests.get(myUrl, headers=header, proxies={"http": '139.5.132.245', "https": '139.5.132.245'})
+                response = requests.get(myUrl, headers=header)
+                print(response.text)
                 import xmltodict, json
                 o = xmltodict.parse(response.text)
                 #print(response.text)
