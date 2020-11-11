@@ -524,7 +524,7 @@ def tempo():
     try:
         patent = request.args['patent']
 
-        return jsonify([[country, get_split.temp(patent, country)['familiesNumber']] for country in ['cn', 'ep', 'us'] ])
+        return jsonify([[i['term'], i['count']] for i in get_split.temp(patent)['widgets']['publications.cc']['terms']])
     except Exception as e:
         print(e)
         return {}
@@ -534,7 +534,7 @@ def temp():
     try:
         classi = request.args['classi']
 
-        return jsonify([[country, get_split.ipc(classi, country)['familiesNumber']] for country in ['cn', 'ep', 'us'] ] + [[classi, 0]])
+        return jsonify([[i['term'], i['count']] for i in get_split.ipc(classi)['widgets']['publications.cc']['terms']])
     except Exception as e:
         print(e)
         return {}
