@@ -534,7 +534,7 @@ def temp():
     try:
         classi = request.args['classi']
 
-        return jsonify([[country, get_split.ipc(classi, country)['familiesNumber']] for country in ['cn', 'ep', 'us'] ] + [[classi, o]])
+        return jsonify([[country, get_split.ipc(classi, country)['familiesNumber']] for country in ['cn', 'ep', 'us'] ] + [[classi, 0]])
     except Exception as e:
         print(e)
         return {}
