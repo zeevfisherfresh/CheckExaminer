@@ -520,9 +520,21 @@ def get_cache_no(element):
         return {}
 
 @app.route('/temp')
-def get_cache_no():
+def tempo():
     try:
-        return jsonify(get_split.temp())
+        patent = request.args['patent']
+
+        return jsonify([[country, get_split.temp(patent, country)['familiesNumber']] for country in ['cn', 'ep', 'us'] ])
+    except Exception as e:
+        print(e)
+        return {}
+
+@app.route('/split_per_class')
+def temp():
+    try:
+        classi = request.args['classi']
+
+        return jsonify([[country, get_split.ipc(classi, country)['familiesNumber']] for country in ['cn', 'ep', 'us'] ])
     except Exception as e:
         print(e)
         return {}
