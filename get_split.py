@@ -162,3 +162,38 @@ def get_split(pa):
     pairs = [[i[0], i[1]*1.0/summo] for i in pairs]
     browser.quit()
     return pairs
+
+def get_class_text(cl):
+    import requests
+    print('Fetching info about class', cl)
+    headers = {
+        'sec-ch-ua': '"Chromium";v="86", "\\"Not\\\\A;Brand";v="99", "Google Chrome";v="86"',
+        'Accept': '*/*',
+        'Referer': 'https://worldwide.espacenet.com/patent/static/cpc.html',
+        'X-Requested-With': 'XMLHttpRequest',
+        'sec-ch-ua-mobile': '?0',
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.183 Safari/537.36',
+    }
+
+    params = (
+        ('depth', '0'),
+        ('interleave', ''),
+        ('ancestors', ''),
+        ('navigation', ''),
+        ('origin', 'https_worldwide_espacenet_com'),
+    )
+
+    resp = response = requests.get('https://worldwide.espacenet.com/3.2/rest-services/classification/cpc/' + cl + '.json', headers=headers, params=params).json()
+    resp = resp['ops:world-patent-data']['ops:classification-scheme']['ops:cpc']['cpc:class-scheme']
+    while 'cpc:classification-item' in resp:
+        resp = resp['cpc:classification-item']
+    try:
+        return resp['cpc:class-title']['cpc:title-part'][0]['cpc:text']['$']
+    except:
+        return resp['cpc:class-title']['cpc:title-part']['cpc:text']['$']
+
+    #NB. Original query string below. It seems impossible to parse and
+    #reproduce query strings 100% accurately so the one below is given
+    #in case the reproduced version is not "correct".
+    # response = requests.get('https://worldwide.espacenet.com/3.2/rest-services/classification/cpc/H04L29/08.json?depth=0&interleave&ancestors&navigation&origin=https_worldwide_espacenet_com', headers=headers)
+
