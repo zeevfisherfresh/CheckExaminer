@@ -197,3 +197,48 @@ def get_class_text(cl):
     #in case the reproduced version is not "correct".
     # response = requests.get('https://worldwide.espacenet.com/3.2/rest-services/classification/cpc/H04L29/08.json?depth=0&interleave&ancestors&navigation&origin=https_worldwide_espacenet_com', headers=headers)
 
+def get_epo_records(pa, page_no):
+    import requests
+
+    cookies = {
+        'cpcops_settings': '%7B%22display_tree%22%3Atrue%2C%22show-2000-series%22%3A%22state-1%22%2C%22dateRange%22%3A%7B%22from%22%3A%7B%22month%22%3A10%2C%22year%22%3A2020%7D%2C%22to%22%3A%7B%22month%22%3A10%2C%22year%22%3A2020%7D%2C%22isRange%22%3Afalse%7D%7D',
+        'cart': '%5B%5D',
+        'menuCurrentSearch': '%2F%2Fworldwide.espacenet.com%2FsearchResults%3FAB%3D%26AP%3D%26CPC%3D%26DB%3DEPODOC%26IC%3D%26IN%3D%26PA%3DIBM%26PD%3D%26PN%3D%26PR%3D%26ST%3Dadvanced%26Submit%3DSearch%26TI%3D%26locale%3Den_EP',
+        'PGS': '10',
+        'org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE': 'en_EP',
+        'currentUrl': 'https%3A%2F%2Fworldwide.espacenet.com%2FadvancedSearch%3Flocale%3Den_EP',
+        'LevelXLastSelectedDataSource': 'EPODOC',
+        'JSESSIONID': 'pj65Yu3t6ExqToR9SkYMX03O.espacenet_levelx_prod_1',
+    }
+
+    headers = {
+        'Connection': 'keep-alive',
+        'sec-ch-ua': '"Chromium";v="86", "\\"Not\\\\A;Brand";v="99", "Google Chrome";v="86"',
+        'Accept': 'application/json,application/i18n+xml',
+        'X-EPO-PQL-Profile': 'cpci',
+        'EPO-Trace-Id': 'ylzamx-9sx0g6-AAA-000176',
+        'sec-ch-ua-mobile': '?0',
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36',
+        'Content-Type': 'application/json;charset=UTF-8',
+        'Origin': 'https://worldwide.espacenet.com',
+        'Sec-Fetch-Site': 'same-origin',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Dest': 'empty',
+        'Referer': 'https://worldwide.espacenet.com/patent/search?q=pa%3D%22IBM%22',
+        'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
+    }
+
+    params = (
+        ('lang', 'en,de,fr'),
+        ('q', 'pa="'+pa+'"'),
+        ('qlang', 'cql'),
+        ('p_s', 'espacenet'),
+        ('p_q', 'pa="'+pa+'"'),
+    )
+
+    data = '{"query":{"fields":["publications.ti_*","publications.abs_*","publications.pn_docdb","publications.in","publications.in_country","publications.pa","publications.pa_country","publications.pd","publications.pr_docdb","publications.app_fdate.untouched","publications.ipc","publications.ipc_ic","publications.ipc_icci","publications.ipc_iccn","publications.ipc_icai","publications.ipc_ican","publications.ci_cpci","publications.ca_cpci","publications.cl_cpci","biblio:pa;pa_orig;pa_unstd;in;in_orig;in_unstd;pa_country;in_country;pd;pn;allKindCodes;","oprid_full.untouched","opubd_full.untouched"],"from":' + str(page_no*20) + ',"size":20,"highlighting":[{"field":"publications.ti_en","fragment_words_number":20,"number_of_fragments":3,"hits_only":true},{"field":"publications.abs_en","fragment_words_number":20,"number_of_fragments":3,"hits_only":true},{"field":"publications.ti_de","fragment_words_number":20,"number_of_fragments":3,"hits_only":true},{"field":"publications.abs_de","fragment_words_number":20,"number_of_fragments":3,"hits_only":true},{"field":"publications.ti_fr","fragment_words_number":20,"number_of_fragments":3,"hits_only":true},{"field":"publications.abs_fr","fragment_words_number":20,"number_of_fragments":3,"hits_only":true},{"field":"publications.pn","fragment_words_number":20,"number_of_fragments":3,"hits_only":true},{"field":"publications.pn_docdb","fragment_words_number":20,"number_of_fragments":3,"hits_only":true},{"field":"publications.pa","fragment_words_number":20,"number_of_fragments":3,"hits_only":true}],"sort":{"field":"oprid_full","order":"desc"}},"filters":{"publications.patent":[{"value":["true"]}]},"widgets":{}}'
+
+    response = requests.post('https://worldwide.espacenet.com/3.2/rest-services/search', headers=headers, params=params, cookies=cookies, data=data)
+    return response.json()
+
+

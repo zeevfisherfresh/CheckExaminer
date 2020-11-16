@@ -632,6 +632,12 @@ def split():
     import json
     return res
 
+@app.route('/get_epo_records')
+def get_epo_records():
+    pa = request.args['pa']
+    page_no = int(request.args['page_no'])
+    return jsonify(get_split.get_epo_records(pa, page_no))
+
 
 @app.route('/subscribe')
 def subscribe():
