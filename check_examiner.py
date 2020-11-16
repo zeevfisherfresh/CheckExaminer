@@ -932,10 +932,17 @@ def fp():
     fetched = False
     from random import randint
     from time import sleep
+
+    title = ""
+    applicant = ""
+    first_inventor = ""
+    first_deadline_30 = ""
+    application_reference = ""
     while not fetched:
         try:
             myUrl = 'http://ops.epo.org/rest-services/published-data/publication/epodoc/' + patent
             response = requests.get(myUrl, headers=header)
+            print(response.text)
             fetched = True
             import xmltodict, json
             application = xmltodict.parse(response.text).get("ops:world-patent-data").get("exchange-documents").get("exchange-document")
@@ -993,6 +1000,10 @@ def fp():
 
     print('now fetching claims', patent)
     fetched = False
+    claims_num = 0
+    independent_claims = 0
+    total_words = 0
+    num_of_words_in_claims = 0
     while not fetched:
         try:
             myUrl = 'http://ops.epo.org/rest-services/published-data/publication/epodoc/' + patent + "/claims"
@@ -1033,23 +1044,23 @@ def fp():
 
     print('now fetching pages and images', patent)
     fetched = False
+    total_p = 0
+    claims_p = 0
+    drawings_p = 0
+    description_p = 0
+    description_start_page = 0
+    description_end_page = 0
+    drawings_start_page = 0
+    drawings_end_page = 0
+    claims_start_page = 0
+    claims_end_page = 0
+    search_start_page = 0
     while not fetched:
         try:
             myUrl = 'http://ops.epo.org/rest-services/published-data/publication/epodoc/' + patent + ".A1/images"
             response = requests.get(myUrl, headers=header)
             fetched = True
             images_data = xmltodict.parse(response.text).get("ops:world-patent-data").get("ops:document-inquiry").get("ops:inquiry-result").get("ops:document-instance")
-            total_p = 0
-            claims_p = 0
-            drawings_p = 0
-            description_p = 0
-            description_start_page = 0
-            description_end_page = 0
-            drawings_start_page = 0
-            drawings_end_page = 0
-            claims_start_page = 0
-            claims_end_page = 0
-            search_start_page = 0
 
             for id in range (0,len(images_data)):
                 image_data = images_data[id]
