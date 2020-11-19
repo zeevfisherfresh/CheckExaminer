@@ -945,8 +945,13 @@ def fp():
             print(response.text)
             fetched = True
             import xmltodict, json
+
             application = xmltodict.parse(response.text).get("ops:world-patent-data").get("exchange-documents").get("exchange-document")
-            bibliographic_data = application.get("bibliographic-data")
+            try:
+                bibliographic_data = application.get("bibliographic-data")
+            except:
+                bibliographic_data = application[0].get("bibliographic-data")
+
 
             application_reference = str(bibliographic_data.get("application-reference").get("document-id")[1].get("doc-number"))
             application_reference = "PCT/" + application_reference[6:8] + application_reference[2:6] + "/" + "0" + application_reference[8:]
@@ -995,6 +1000,8 @@ def fp():
             # CPC translation to words is somewhere here: https://publication.epo.org/raw-data/product?productId=71
 
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             print('Exception when fetching patent ',e)
             pass
 
@@ -1022,6 +1029,8 @@ def fp():
                         independent_claims = independent_claims + 1
 
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             print('Exception when fetching patent ',e)
             pass
 
@@ -1039,6 +1048,8 @@ def fp():
             description = str(description)
             num_of_words_in_description = len(description.split())
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             print('Exception when fetching patent ',e)
             pass
 
@@ -1059,6 +1070,7 @@ def fp():
         try:
             myUrl = 'http://ops.epo.org/rest-services/published-data/publication/epodoc/' + patent + ".A1/images"
             response = requests.get(myUrl, headers=header)
+            print(response.text)
             fetched = True
             images_data = xmltodict.parse(response.text).get("ops:world-patent-data").get("ops:document-inquiry").get("ops:inquiry-result").get("ops:document-instance")
 
@@ -1094,6 +1106,8 @@ def fp():
             total_words = num_of_words_in_description+num_of_words_in_claims
 
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             print('Exception when fetching patent ',e)
             pass
 
