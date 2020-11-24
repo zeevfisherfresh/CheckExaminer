@@ -88,6 +88,10 @@ def hello_world():
 def index():
   return render_template('index.html')
 
+@app.route('/cia')
+def cia():
+  return jsonify(requests.get('https://raw.githubusercontent.com/iancoleman/cia_world_factbook_api/master/data/factbook.json').json())
+
 def hello_world(examiner_name):
         ## Initializing the mongo connection
     connection_string = 'mongodb+srv://Zeevtest:Zeevtest@freship-fu97s.mongodb.net/test?retryWrites=true&w=majority'
