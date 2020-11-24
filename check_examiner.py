@@ -94,7 +94,11 @@ def cia():
   mappo = {}
   for c in ['united_states', 'mexico', 'japan', 'european_union', 'china', 'brazil']:
     mappo[c] = response['countries'][c]
-  return jsonify(mappo)
+  response = jsonify(mappo)
+  header = response.headers
+  header['Access-Control-Allow-Origin'] = '*'
+  return response
+
 
 
 def hello_world(examiner_name):
