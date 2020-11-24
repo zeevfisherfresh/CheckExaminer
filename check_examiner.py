@@ -90,7 +90,10 @@ def index():
 
 @app.route('/cia')
 def cia():
-  return jsonify(requests.get('https://raw.githubusercontent.com/iancoleman/cia_world_factbook_api/master/data/factbook.json').json())
+  response = jsonify(requests.get('https://raw.githubusercontent.com/iancoleman/cia_world_factbook_api/master/data/factbook.json').json())
+  response.headers.add('Access-Control-Allow-Origin', '*')
+  return response
+
 
 def hello_world(examiner_name):
         ## Initializing the mongo connection
