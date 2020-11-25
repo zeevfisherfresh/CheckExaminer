@@ -716,10 +716,11 @@ def unsubscribe():
     send_email(email, html, "Deadline unsubscription notice")
     return jsonify("Successfuly unscubscribed!")
 
-@app.route('/put_con')
+@app.route('/put_con', methods=["POST"])
 def put_con():
     country = request.args['country']
-    content = request.args['content']
+    print(request.get_json())
+    content = request.get_json().get('content')
 
     try:
         conn = psycopg2.connect(host='ec2-34-231-56-78.compute-1.amazonaws.com',
