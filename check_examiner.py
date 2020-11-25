@@ -74,6 +74,8 @@ cache = Cache(app)
 from flask_cors import CORS, cross_origin
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
+
+
 @app.route('/')
 @app.route('/data')
 def get_examiner():
@@ -713,6 +715,61 @@ def unsubscribe():
 
     send_email(email, html, "Deadline unsubscription notice")
     return jsonify("Successfuly unscubscribed!")
+
+@app.route('/put_con')
+def put_con():
+    country = request.args['country']
+    content = request.args['content']
+
+    try:
+        conn = psycopg2.connect(host='ec2-34-231-56-78.compute-1.amazonaws.com',
+                                             database='d4g1rkpppj5adf',
+                                             user='igsgvulkrsftdl',
+                                             port=5432,
+                                             password='a25b712e2b4fadaa145685d089fead23e8e3d53fa45425312e98cf1c8a1dcbe9')
+        # create a cursor
+        cur = conn.cursor()
+        
+    # execute a statement
+        cur.execute("delete from country_content where country like '%" + country+"%';" )
+        cur.execute("INSERT INTO country_content (country, content) VALUES ('%s', '%s')" % (country, content))
+        # display the PostgreSQL database server version
+       
+    # close the communication with the PostgreSQL
+        conn.commit()
+        conn.close()
+
+    except Error as e:
+        print("Error while connecting to MySQL", e)
+
+    return jsonify({})
+
+@app.route('/get_con')
+def get_con():
+    country = request.args['country']
+    result = []
+    try:
+        conn = psycopg2.connect(host='ec2-34-231-56-78.compute-1.amazonaws.com',
+                                             database='d4g1rkpppj5adf',
+                                             user='igsgvulkrsftdl',
+                                             port=5432,
+                                             password='a25b712e2b4fadaa145685d089fead23e8e3d53fa45425312e98cf1c8a1dcbe9')
+        # create a cursor
+        cur = conn.cursor()
+        
+    # execute a statement
+        cur.execute("select content from country_content where country  = ('%s')" % ( country))
+        # display the PostgreSQL database server version
+        result = cur.fetchall()
+    # close the communication with the PostgreSQL
+        conn.commit()
+        conn.close()
+
+    except Error as e:
+        print("Error while connecting to MySQL", e)
+
+    return jsonify(result)
+
 
 
 def get_rows():
