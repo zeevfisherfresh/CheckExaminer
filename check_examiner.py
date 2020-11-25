@@ -94,7 +94,7 @@ def index():
 def cia():
   response = requests.get('https://raw.githubusercontent.com/iancoleman/cia_world_factbook_api/master/data/factbook.json').json()
   mappo = {}
-  for c in ['united_states', 'mexico', 'japan', 'european_union', 'china', 'brazil']:
+  for c in response['countries']:
     mappo[c] = response['countries'][c]
   response = jsonify(mappo)
   header = response.headers
@@ -646,6 +646,17 @@ def split():
     print(res)
     import json
     return res
+
+@app.route('/get_countries')
+def get_countries():
+    response = requests.get('https://raw.githubusercontent.com/iancoleman/cia_world_factbook_api/master/data/factbook.json').json()
+    mappo = []
+    for c in response['countries']:
+        mappo += [c]
+    response = jsonify(mappo)
+    header = response.headers
+    header['Access-Control-Allow-Origin'] = '*'
+    return response
 
 @app.route('/get_epo_records')
 def get_epo_records():
