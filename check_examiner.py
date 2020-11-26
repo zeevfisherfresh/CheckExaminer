@@ -74,6 +74,7 @@ cache = Cache(app)
 from flask_cors import CORS, cross_origin
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 
 @app.route('/')
@@ -729,21 +730,24 @@ def unsubscribe():
 
 @app.route('/put_con', methods=["POST"])
 def put_con():
+    print('put_con')
     country = request.args['country']
-    print(request.get_json())
+    print(request)
     content = request.get_json().get('content')
-
+    print(content)
     try:
+        print('Connecting')
         conn = psycopg2.connect(host='ec2-34-231-56-78.compute-1.amazonaws.com',
                                              database='d4g1rkpppj5adf',
                                              user='igsgvulkrsftdl',
                                              port=5432,
                                              password='a25b712e2b4fadaa145685d089fead23e8e3d53fa45425312e98cf1c8a1dcbe9')
-        # create a cursor
+        print('connected')
         cur = conn.cursor()
         
     # execute a statement
         cur.execute("delete from country_content where country like '%" + country+"%';" )
+        print('inserting')
         cur.execute("INSERT INTO country_content (country, content) VALUES ('%s', '%s')" % (country, content))
         # display the PostgreSQL database server version
        
