@@ -1042,6 +1042,7 @@ def fp():
             application_reference = str(bibliographic_data.get("application-reference").get("document-id")[1].get("doc-number"))
             application_reference = "PCT/" + application_reference[6:8] + application_reference[2:6] + "/" + "0" + application_reference[8:]
             priority_claims = bibliographic_data.get("priority-claims").get("priority-claim")
+            print(priority_claims)
             try: 
                for k in range (0,len(priority_claims)):
             # #        print (priority_claims)
@@ -1062,7 +1063,25 @@ def fp():
                      first_deadline_30 = add_months(earliest_priority,30)
 
             except KeyError:
-                print ("error")
+               for k in range (0,len(priority_claims)):
+                try:
+                # #        print (priority_claims)
+                # #        priority_claim=priority_claims[0].get("document-id")
+                    if "document-id" in priority_claims:
+                       priority_claim=priority_claims.get("document-id")
+                    else:    
+                       priority_claim=priority_claims[k].get("document-id")
+                    for l in range (0,len(priority_claim)):
+                       priority_claim_type = priority_claim
+                       if "date" in priority_claim_type:
+                         earliest_priority = priority_claim_type.get("date")
+                         earliest_priority_year = int(earliest_priority[0:4])
+                         earliest_priority_month = int(earliest_priority[4:6])
+                         earliest_priority_day = int(earliest_priority[6:8])
+                         earliest_priority = datetime.date(earliest_priority_year,earliest_priority_month,earliest_priority_day)                     
+                         first_deadline_30 = add_months(earliest_priority,30)
+                except:
+                    pass
 
             
             applicant = bibliographic_data.get("parties").get("applicants").get("applicant")[0].get("applicant-name").get("name")
@@ -1071,7 +1090,7 @@ def fp():
             title = bibliographic_data.get("invention-title")[1].get("#text")
 
             print (application_reference + "," + applicant + "," + str(earliest_priority) + "," + str(first_deadline_30) + "," + title)
-
+            print('arek',bibliographic_data.get("classifications-ipcr"))
             try:
                 for classifications in bibliographic_data.get("classifications-ipcr").get("classification-ipcr"):
                     class_text = ((classifications['text']))
