@@ -658,7 +658,6 @@ def get_countries():
     mappo = []
     for c in response['countries']:
         mappo += [c]
-    mappo +=["%2Ceuroasia%2Caripo%2Coapi%2Cgcc"]
     response = jsonify(mappo)
     header = response.headers
     header['Access-Control-Allow-Origin'] = '*'
@@ -789,9 +788,6 @@ def get_con():
 
     except Error as e:
         print("Error while connecting to MySQL", e)
-    if(country=='countries'):
-        return jsonify([[(result[0][0]+'%2Ceuroasia%2Caripo%2Coapi%2Cgcc')]])
-
     return jsonify(result)
 
 
