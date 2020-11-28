@@ -97,6 +97,10 @@ def cia():
   mappo = {}
   for c in response['countries']:
     mappo[c] = response['countries'][c]
+  mappo['euroasia'] = {}
+  mappo['gcc'] = {}
+  mappo['oapi'] = {}
+  mappo['aripo'] = {}
   response = jsonify(mappo)
   header = response.headers
   header['Access-Control-Allow-Origin'] = '*'
@@ -654,6 +658,7 @@ def get_countries():
     mappo = []
     for c in response['countries']:
         mappo += [c]
+    mappo +=["%2Ceuroasia%2Caripo%2Coapi%2Cgcc"]
     response = jsonify(mappo)
     header = response.headers
     header['Access-Control-Allow-Origin'] = '*'
@@ -777,12 +782,15 @@ def get_con():
         cur.execute("select content from country_content where country  = ('%s')" % ( country))
         # display the PostgreSQL database server version
         result = cur.fetchall()
+        print(result)
     # close the communication with the PostgreSQL
         conn.commit()
         conn.close()
 
     except Error as e:
         print("Error while connecting to MySQL", e)
+    if(country=='countries'):
+        return jsonify([[(result[0][0]+'%2Ceuroasia%2Caripo%2Coapi%2Cgcc')]])
 
     return jsonify(result)
 
