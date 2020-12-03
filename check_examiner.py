@@ -544,9 +544,11 @@ def tempo():
     try:
         patent = request.args['patent']
 
-        return jsonify([[i['term'], i['count']] for i in get_split.temp(patent)['widgets']['publications.cc']['terms']] + [[patent, patent]])
+        return jsonify([[i['term'], i['count']] for i in get_split.temp(patent)['widgets']['publications.in_country']['terms']] + [[patent, patent]])
     except Exception as e:
         print(e)
+        import traceback
+        traceback.print_exc()
         return {}
 
 @app.route('/split_per_class')
@@ -554,7 +556,7 @@ def temp():
     try:
         classi = request.args['classi']
 
-        return jsonify([[i['term'], i['count']] for i in get_split.ipc(classi)['widgets']['publications.cc']['terms']] + [[classi, classi]])
+        return jsonify([[i['term'], i['count']] for i in get_split.ipc(classi)['widgets']['publications.in_country']['terms']] + [[classi, classi]])
     except Exception as e:
         print(e)
         return {}
