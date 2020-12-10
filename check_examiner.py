@@ -1128,13 +1128,21 @@ def fp():
             response = requests.get(myUrl, headers=header)
             fetched = True
             claims = xmltodict.parse(response.text).get("ops:world-patent-data").get("ftxt:fulltext-documents").get("ftxt:fulltext-document").get("claims").get("claim").get("claim-text")
-            
-            num_of_words_in_claims = len(claims.split())
-            claims = claims.split('\n')
+            try:
+                num_of_words_in_claims = len(claims.split())
+            except:
+                num_of_words_in_claims = 0
+                for claim in claims:
+                    num_of_words_in_claims += len(claim.split())
+            try:
+                claims = claims.split('\n')
+            except:
+                claims = [claim.split('\n') for claim in claims][0]
+            print(claims)
             claims_num=0
             independent_claims = 0
             for i in range (0,len(claims)):
-                if (claims[i][0] == "1" or claims[i][0]=="2" or claims[i][0]=="3" or claims[i][0]=="4" or claims[i][0]=="5" or claims[i][0]=="6" or claims[i][0]=="7" or claims[i][0]=="8" or claims[i][0]=="9"):  #if the paragraph doesn't start with a number, it is not a claim and shouldn't be counted.
+                if (claims[i][0] == '-' or claims[i][0] == "1" or claims[i][0]=="2" or claims[i][0]=="3" or claims[i][0]=="4" or claims[i][0]=="5" or claims[i][0]=="6" or claims[i][0]=="7" or claims[i][0]=="8" or claims[i][0]=="9"):  #if the paragraph doesn't start with a number, it is not a claim and shouldn't be counted.
                     claims_num=claims_num+1
                     if "claim" not in claims[i]:
                         independent_claims = independent_claims + 1
@@ -1214,6 +1222,7 @@ def fp():
             claims_p = claims_end_page - claims_start_page +1
             description_p = description_end_page - description_start_page +1
             drawings_p = drawings_end_page - drawings_start_page +1
+            print(num_of_words_in_claims, num_of_words_in_description)
             total_words = num_of_words_in_description+num_of_words_in_claims
 
         except Exception as e:
