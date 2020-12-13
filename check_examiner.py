@@ -1174,10 +1174,10 @@ def fp():
 
     print('now fetching pages and images', patent)
     fetched = False
-    total_p = "Undetected"
-    claims_p = "Undetected"
-    drawings_p = "Undetected"
-    description_p = "Undetected"
+    total_p = 0
+    claims_p = 0
+    drawings_p = 0
+    description_p = 0
     description_start_page = "Undetected"
     description_end_page = "Undetected"
     drawings_start_page = "Undetected"
@@ -1191,6 +1191,7 @@ def fp():
             response = requests.get(myUrl, headers=header)
             print(response.text)
             fetched = True
+            print(xmltodict.parse(response.text).get("ops:world-patent-data"))
             images_data = xmltodict.parse(response.text).get("ops:world-patent-data").get("ops:document-inquiry").get("ops:inquiry-result").get("ops:document-instance")
 
             for id in range (0,len(images_data)):
