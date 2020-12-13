@@ -1120,7 +1120,7 @@ def fp():
     fetched = False
     claims_num = "Undetected"
     independent_claims = "Undetected"
-    total_words = "Undetected"
+    total_words = 0
     num_of_words_in_claims = "Undetected"
     while not fetched:
         try:
