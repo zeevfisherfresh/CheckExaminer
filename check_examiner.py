@@ -14,6 +14,7 @@ from email.mime.image import MIMEImage
 import calendar
 import get_split
 
+
 APPS_TO_ANALYSE = 90
 executor = ThreadPoolExecutor(max_workers=10)
 
@@ -66,7 +67,7 @@ matplotlib.use('agg')
 config = {
     "DEBUG": True,          # some Flask specific configs
     "CACHE_TYPE": "simple", # Flask-Caching related configs
-    "CACHE_DEFAULT_TIMEOUT": 300
+    "CACHE_DEFAULT_TIMEOUT": 60*60*24
 }
 app = Flask(__name__)
 app.config.from_mapping(config)
