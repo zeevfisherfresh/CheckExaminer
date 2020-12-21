@@ -91,13 +91,21 @@ def hello_world():
 @app.route('/application')
 def index():
   return render_template('index.html')
-
+import json
 @app.route('/cia')
 def cia():
-  response = requests.get('https://raw.githubusercontent.com/iancoleman/cia_world_factbook_api/master/data/factbook.json').json()
+  shown_countries = get_country_data("shown")
+  with open('factbook.json') as json_file:
+    data = json.load(json_file)
+    
+  print(shown_countries)
+  response = data
   mappo = {}
-  for c in response['countries']:
-    mappo[c] = response['countries'][c]
+  for c in shown_countries:
+    try:
+        mappo[c] = response['countries'][c]
+    except:
+        pass
   mappo['euroasia'] = {}
   mappo['gcc'] = {}
   mappo['oapi'] = {}
@@ -793,6 +801,29 @@ def get_con():
         print("Error while connecting to MySQL", e)
     return jsonify(result)
 
+def get_country_data(country):
+    result = []
+    try:
+        conn = psycopg2.connect(host='ec2-34-231-56-78.compute-1.amazonaws.com',
+                                             database='d4g1rkpppj5adf',
+                                             user='igsgvulkrsftdl',
+                                             port=5432,
+                                             password='a25b712e2b4fadaa145685d089fead23e8e3d53fa45425312e98cf1c8a1dcbe9')
+        # create a cursor
+        cur = conn.cursor()
+        
+    # execute a statement
+        cur.execute("select content from country_content where country  = ('%s')" % ( country))
+        # display the PostgreSQL database server version
+        result = cur.fetchall()
+        print(result)
+    # close the communication with the PostgreSQL
+        conn.commit()
+        conn.close()
+
+    except Error as e:
+        print("Error while connecting to MySQL", e)
+    return (result[0][0].split(','))
 
 
 def get_rows():
