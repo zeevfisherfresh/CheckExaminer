@@ -182,15 +182,22 @@ def get_class_text(cl):
         ('navigation', ''),
         ('origin', 'https_worldwide_espacenet_com'),
     )
-
-    resp = response = requests.get('https://worldwide.espacenet.com/3.2/rest-services/classification/cpc/' + cl + '.json', headers=headers, params=params).json()
-    resp = resp['ops:world-patent-data']['ops:classification-scheme']['ops:cpc']['cpc:class-scheme']
-    while 'cpc:classification-item' in resp:
-        resp = resp['cpc:classification-item']
+    print('https://worldwide.espacenet.com/3.2/rest-services/classification/cpc/' + cl + '.json')
+    print(requests.get('https://worldwide.espacenet.com/3.2/rest-services/classification/cpc/' + cl + '.json', headers=headers, params=params))
+    resp = ''
     try:
-        return resp['cpc:class-title']['cpc:title-part'][0]['cpc:text']['$']
-    except:
-        return resp['cpc:class-title']['cpc:title-part']['cpc:text']['$']
+        resp = response = requests.get('https://worldwide.espacenet.com/3.2/rest-services/classification/cpc/' + cl + '.json', headers=headers, params=params).json()
+        resp = resp['ops:world-patent-data']['ops:classification-scheme']['ops:cpc']['cpc:class-scheme']
+        while 'cpc:classification-item' in resp:
+            resp = resp['cpc:classification-item']
+        try:
+            resp = resp['cpc:class-title']['cpc:title-part'][0]['cpc:text']['$']
+        except:
+            resp = resp['cpc:class-title']['cpc:title-part']['cpc:text']['$']
+    except Exception as e:
+        pass
+    print(resp)
+    return resp
 
     #NB. Original query string below. It seems impossible to parse and
     #reproduce query strings 100% accurately so the one below is given
