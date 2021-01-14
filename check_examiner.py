@@ -909,7 +909,7 @@ def get_splito(patent_number, applicant):
                 print(response.text)
                 import xmltodict, json
                 o = xmltodict.parse(response.text)
-                #print(response.text)
+                print(response.text)
                 if 'fault' in o:
                     if(o['fault']['code'] == 'CLIENT.RobotDetected'):
                         print('Throttled by EPO', query)
@@ -1062,6 +1062,7 @@ def fp():
     first_inventor = "Undetected"
     first_deadline_30 = "Undetected"
     application_reference = "Undetected"
+    citations = []
     while not fetched:
         try:
             myUrl = 'http://ops.epo.org/rest-services/published-data/publication/epodoc/' + patent
@@ -1076,7 +1077,25 @@ def fp():
             except:
                 bibliographic_data = application[0].get("bibliographic-data")
 
-
+            print(bibliographic_data['references-cited'])
+            try:
+                if 'references-cited' in bibliographic_data:
+                    for citation in bibliographic_data['references-cited']['citation']:
+                        try:
+                            for i in citation['patcit']:
+                                print('adek', i)
+                            for i in citation['patcit']['document-id']:
+                                for j in i:
+                                    print(j)
+                                    print('wash', i[j])
+                                if i['@document-id-type'] == 'epodoc':
+                                    citations += [[i['date'], i['doc-number']]]
+                        except:
+                            import traceback
+                            traceback.print_exc()
+            except Exception as e:
+                import traceback
+                print('error', traceback.print_exc())
             application_reference = str(bibliographic_data.get("application-reference").get("document-id")[1].get("doc-number"))
             application_reference = "PCT/" + application_reference[6:8] + application_reference[2:6] + "/" + "0" + application_reference[8:]
             priority_claims = bibliographic_data.get("priority-claims").get("priority-claim")
@@ -1128,7 +1147,6 @@ def fp():
             title = bibliographic_data.get("invention-title")[1].get("#text")
 
             print (application_reference + "," + applicant + "," + str(earliest_priority) + "," + str(first_deadline_30) + "," + title)
-            print('arek',bibliographic_data.get("classifications-ipcr"))
             try:
                 for classifications in bibliographic_data.get("classifications-ipcr").get("classification-ipcr"):
                     class_text = ((classifications['text']))
@@ -1265,5 +1283,5 @@ def fp():
             pass
 
 
-    return jsonify([total_words,num_of_words_in_claims,claims_num,independent_claims,title,applicant,first_inventor,str(first_deadline_30),classes,total_p, claims_p,drawings_p,description_p,application_reference, [get_split.get_class_text(cl) for cl in classes]])
+    return jsonify([total_words,num_of_words_in_claims,claims_num,independent_claims,title,applicant,first_inventor,str(first_deadline_30),classes,total_p, claims_p,drawings_p,description_p,application_reference, [get_split.get_class_text(cl) for cl in classes], get_split.get_citations(patent)])
 

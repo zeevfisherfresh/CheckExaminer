@@ -163,6 +163,65 @@ def get_split(pa):
     browser.quit()
     return pairs
 
+def get_citations(patent_id):
+    import requests
+    print('get_citations', patent_id)
+    cookies = {
+        'org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE': 'en_EP',
+        'LevelXLastSelectedDataSource': 'EPODOC',
+        'cart': '%5B%5D',
+        'cpcops_settings': '%7B%22display_tree%22%3Atrue%2C%22show-2000-series%22%3A%22state-1%22%2C%22dateRange%22%3A%7B%22from%22%3A%7B%22month%22%3A0%2C%22year%22%3A2021%7D%2C%22to%22%3A%7B%22month%22%3A0%2C%22year%22%3A2021%7D%2C%22isRange%22%3Afalse%7D%7D',
+        'currentUrl': 'https%3A%2F%2Fworldwide.espacenet.com%2FadvancedSearch%3Flocale%3Den_EP',
+        'JSESSIONID': 'Brc2yUYWSmvHncToqfcZ3kjn.espacenet_levelx_prod_2',
+    }
+
+    headers = {
+        'Connection': 'keep-alive',
+        'sec-ch-ua': '"Google Chrome";v="87", " Not;A Brand";v="99", "Chromium";v="87"',
+        'Accept': 'multipart/form-data',
+        'EPO-Trace-Id': '7k9m6c-0ea7uy-TTT-000059',
+        'sec-ch-ua-mobile': '?0',
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
+        'Sec-Fetch-Site': 'same-origin',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Dest': 'empty',
+        'Referer': 'https://worldwide.espacenet.com/patent/search/family/042048608/publication/CN101685444A?q=pn%3DCN101685444A',
+        'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
+    }
+
+    params = (
+        ('citationFields', 'publications.ti_en,publications.ti_fr,publications.ti_de,publications.ct,publications.pn,publications.pn_docdb,publications.pd,oprid_full.untouched,opubd_full.untouched,publications.abs_en,publications.in,publications.pa,publications.app_fdate.untouched,publications.famn,publications.ci_cpci,publications.ca_cpci,publications.cl_cpci,publications.ipc_icai,publications.ipc_ican'),
+        ('lang', 'en,de,fr'),
+        ('number', patent_id),
+        ('q', 'pn=' + patent_id),
+        ('qlang', 'cql'),
+    )
+    import json
+    responso = []
+    try:
+        responso = (requests.get('https://worldwide.espacenet.com/3.2/rest-services/search/family/042048608/aggregated/biblio', headers=headers, params=params, cookies=cookies).text)
+        print('bitch', responso)
+        responso = json.loads(responso[92:responso.rfind('}')+1])
+        return ([(responso[i]['lookup_docdb']['*'][0], responso[i]['app_fdate.untouched']["*"][0]) for i in responso if 'forward' in i])
+    except:
+        pass
+    return responso
+
+#NB. Original query string below. It seems impossible to parse and
+#reproduce query strings 100% accurately so the one below is given
+#in case the reproduced version is not "correct".
+# response = requests.get('https://worldwide.espacenet.com/3.2/rest-services/search/family/042048608/aggregated/biblio?citationFields=publications.ti_en%2Cpublications.ti_fr%2Cpublications.ti_de%2Cpublications.ct%2Cpublications.pn%2Cpublications.pn_docdb%2Cpublications.pd%2Coprid_full.untouched%2Copubd_full.untouched%2Cpublications.abs_en%2Cpublications.in%2Cpublications.pa%2Cpublications.app_fdate.untouched%2Cpublications.famn%2Cpublications.ci_cpci%2Cpublications.ca_cpci%2Cpublications.cl_cpci%2Cpublications.ipc_icai%2Cpublications.ipc_ican&lang=en%2Cde%2Cfr&number=CN101685444A&q=pn%3DCN101685444A&qlang=cql', headers=headers, cookies=cookies)
+
+
+
+#NB. Original query string below. It seems impossible to parse and
+#reproduce query strings 100% accurately so the one below is given
+#in case the reproduced version is not "correct".
+# response = requests.get('https://worldwide.espacenet.com/3.2/rest-services/search/family/042048608/aggregated/biblio?citationFields=publications.ti_en%2Cpublications.ti_fr%2Cpublications.ti_de%2Cpublications.ct%2Cpublications.pn%2Cpublications.pn_docdb%2Cpublications.pd%2Coprid_full.untouched%2Copubd_full.untouched%2Cpublications.abs_en%2Cpublications.in%2Cpublications.pa%2Cpublications.app_fdate.untouched%2Cpublications.famn%2Cpublications.ci_cpci%2Cpublications.ca_cpci%2Cpublications.cl_cpci%2Cpublications.ipc_icai%2Cpublications.ipc_ican&lang=en%2Cde%2Cfr&number=CN101685444A&q=pn%3DCN101685444A&qlang=cql', headers=headers, cookies=cookies)
+
+
+
+
 def get_class_text(cl):
     import requests
     print('Fetching info about class', cl)
