@@ -202,7 +202,7 @@ def get_citations(patent_id):
         responso = (requests.get('https://worldwide.espacenet.com/3.2/rest-services/search/family/042048608/aggregated/biblio', headers=headers, params=params, cookies=cookies).text)
         print('bitch', responso)
         responso = json.loads(responso[92:responso.rfind('}')+1])
-        return ([(responso[i]['lookup_docdb']['*'][0], responso[i]['app_fdate.untouched']["*"][0]) for i in responso if 'forward' in i])
+        return ([(responso[i]['lookup_docdb']['*'][0], responso[i]['app_fdate.untouched']["*"][0], patent_id) for i in responso if 'forward' in i])
     except:
         pass
     return responso

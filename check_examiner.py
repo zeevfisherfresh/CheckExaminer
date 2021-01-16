@@ -560,6 +560,18 @@ def tempo():
         traceback.print_exc()
         return {}
 
+@app.route('/get_citations')
+def get_citations():
+    try:
+        patent = request.args['patent']
+
+        return jsonify(get_split.get_citations(patent))
+    except Exception as e:
+        print(e)
+        import traceback
+        traceback.print_exc()
+        return {}
+
 @app.route('/split_per_class')
 def temp():
     try:
@@ -1283,5 +1295,5 @@ def fp():
             pass
 
 
-    return jsonify([total_words,num_of_words_in_claims,claims_num,independent_claims,title,applicant,first_inventor,str(first_deadline_30),classes,total_p, claims_p,drawings_p,description_p,application_reference, [get_split.get_class_text(cl) for cl in classes], get_split.get_citations(patent)])
+    return jsonify([total_words,num_of_words_in_claims,claims_num,independent_claims,title,applicant,first_inventor,str(first_deadline_30),classes,total_p, claims_p,drawings_p,description_p,application_reference, [get_split.get_class_text(cl) for cl in classes]])
 
