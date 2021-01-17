@@ -220,6 +220,90 @@ def get_citations(patent_id):
 # response = requests.get('https://worldwide.espacenet.com/3.2/rest-services/search/family/042048608/aggregated/biblio?citationFields=publications.ti_en%2Cpublications.ti_fr%2Cpublications.ti_de%2Cpublications.ct%2Cpublications.pn%2Cpublications.pn_docdb%2Cpublications.pd%2Coprid_full.untouched%2Copubd_full.untouched%2Cpublications.abs_en%2Cpublications.in%2Cpublications.pa%2Cpublications.app_fdate.untouched%2Cpublications.famn%2Cpublications.ci_cpci%2Cpublications.ca_cpci%2Cpublications.cl_cpci%2Cpublications.ipc_icai%2Cpublications.ipc_ican&lang=en%2Cde%2Cfr&number=CN101685444A&q=pn%3DCN101685444A&qlang=cql', headers=headers, cookies=cookies)
 
 
+def get_patent(patent):
+    import requests
+
+    cookies = {
+        'org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE': 'en_EP',
+        'LevelXLastSelectedDataSource': 'EPODOC',
+        'cart': '%5B%5D',
+        'cpcops_settings': '%7B%22display_tree%22%3Atrue%2C%22show-2000-series%22%3A%22state-1%22%2C%22dateRange%22%3A%7B%22from%22%3A%7B%22month%22%3A0%2C%22year%22%3A2021%7D%2C%22to%22%3A%7B%22month%22%3A0%2C%22year%22%3A2021%7D%2C%22isRange%22%3Afalse%7D%7D',
+        'currentUrl': 'https%3A%2F%2Fworldwide.espacenet.com%2FadvancedSearch%3Flocale%3Den_EP',
+        'JSESSIONID': 'BiDX2krauSns+WaotuFgiRY-.espacenet_levelx_prod_2',
+    }
+
+    headers = {
+        'Connection': 'keep-alive',
+        'sec-ch-ua': '"Google Chrome";v="87", " Not;A Brand";v="99", "Chromium";v="87"',
+        'Accept': 'application/json,application/i18n+xml',
+        'X-EPO-PQL-Profile': 'cpci',
+        'EPO-Trace-Id': 'cx8n4p-3nc24t-AAA-000000',
+        'sec-ch-ua-mobile': '?0',
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
+        'Content-Type': 'application/json;charset=UTF-8',
+        'Origin': 'https://worldwide.espacenet.com',
+        'Sec-Fetch-Site': 'same-origin',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Dest': 'empty',
+        'Referer': 'https://worldwide.espacenet.com/patent/search?q=CN104811627A',
+        'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
+    }
+
+    params = (
+        ('lang', 'en,de,fr'),
+        ('q', patent),
+        ('qlang', 'cql'),
+        ('p_s', 'espacenet'),
+        ('p_q', patent),
+    )
+
+    data = '{"query":{"fields":["publications.ti_*","publications.abs_*","publications.pn_docdb","publications.in","publications.in_country","publications.pa","publications.pa_country","publications.pd","publications.pr_docdb","publications.app_fdate.untouched","publications.ipc","publications.ipc_ic","publications.ipc_icci","publications.ipc_iccn","publications.ipc_icai","publications.ipc_ican","publications.ci_cpci","publications.ca_cpci","publications.cl_cpci","biblio:pa;pa_orig;pa_unstd;in;in_orig;in_unstd;pa_country;in_country;pd;pn;allKindCodes;","oprid_full.untouched","opubd_full.untouched"],"from":0,"size":20,"highlighting":[{"field":"publications.ti_en","fragment_words_number":20,"number_of_fragments":3,"hits_only":true},{"field":"publications.abs_en","fragment_words_number":20,"number_of_fragments":3,"hits_only":true},{"field":"publications.ti_de","fragment_words_number":20,"number_of_fragments":3,"hits_only":true},{"field":"publications.abs_de","fragment_words_number":20,"number_of_fragments":3,"hits_only":true},{"field":"publications.ti_fr","fragment_words_number":20,"number_of_fragments":3,"hits_only":true},{"field":"publications.abs_fr","fragment_words_number":20,"number_of_fragments":3,"hits_only":true},{"field":"publications.pn","fragment_words_number":20,"number_of_fragments":3,"hits_only":true},{"field":"publications.pn_docdb","fragment_words_number":20,"number_of_fragments":3,"hits_only":true},{"field":"publications.pa","fragment_words_number":20,"number_of_fragments":3,"hits_only":true}]},"filters":{"publications.patent":[{"value":["true"]}]},"widgets":{}}'
+    return [requests.post('https://worldwide.espacenet.com/3.2/rest-services/search', headers=headers, params=params, cookies=cookies, data=data).json()]
+
+    #NB. Original query string below. It seems impossible to parse and
+    #reproduce query strings 100% accurately so the one below is given
+    #in case the reproduced version is not "correct".
+    # response = requests.post('https://worldwide.espacenet.com/3.2/rest-services/search?lang=en%2Cde%2Cfr&q=CN104811627A&qlang=cql&p_s=espacenet&p_q=CN104811627A', headers=headers, cookies=cookies, data=data)
+
+def get_claims(patent):
+    import requests
+
+    cookies = {
+        'org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE': 'en_EP',
+        'LevelXLastSelectedDataSource': 'EPODOC',
+        'cart': '%5B%5D',
+        'cpcops_settings': '%7B%22display_tree%22%3Atrue%2C%22show-2000-series%22%3A%22state-1%22%2C%22dateRange%22%3A%7B%22from%22%3A%7B%22month%22%3A0%2C%22year%22%3A2021%7D%2C%22to%22%3A%7B%22month%22%3A0%2C%22year%22%3A2021%7D%2C%22isRange%22%3Afalse%7D%7D',
+        'currentUrl': 'https%3A%2F%2Fworldwide.espacenet.com%2FadvancedSearch%3Flocale%3Den_EP',
+        'JSESSIONID': 'BiDX2krauSns+WaotuFgiRY-.espacenet_levelx_prod_2',
+    }
+
+    headers = {
+        'Connection': 'keep-alive',
+        'sec-ch-ua': '"Google Chrome";v="87", " Not;A Brand";v="99", "Chromium";v="87"',
+        'Accept': 'multipart/form-data',
+        'EPO-Trace-Id': 'cx8n4p-3nc24t-CCC-000020',
+        'sec-ch-ua-mobile': '?0',
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
+        'Sec-Fetch-Site': 'same-origin',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Dest': 'empty',
+        'Referer': 'https://worldwide.espacenet.com/patent/search/family/053696092/publication/CN104811627A?q=CN104811627A',
+        'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
+    }
+
+    params = (
+        ('fields', 'publications.claims_en'),
+        ('q', patent),
+    )
+
+    print(requests.get('https://worldwide.espacenet.com/3.2/rest-services/highlight/family/053696092/publication/US/2019282908/A1', headers=headers, params=params, cookies=cookies).json())
+
+    #NB. Original query string below. It seems impossible to parse and
+    #reproduce query strings 100% accurately so the one below is given
+    #in case the reproduced version is not "correct".
+    # response = requests.get('https://worldwide.espacenet.com/3.2/rest-services/highlight/family/053696092/publication/CN/104811627/A?fields=publications.claims_en&q=CN104811627A', headers=headers, cookies=cookies)
+
+
 
 
 def get_class_text(cl):

@@ -1047,6 +1047,18 @@ def add_months(sourcedate, months):
      day = min(sourcedate.day, calendar.monthrange(year,month)[1])
      return datetime.date(year, month, day)
 
+@app.route('/get_patent')
+def get_patent():
+    try:
+        patent = request.args['patent']
+
+        return jsonify(get_split.get_patent(patent))
+    except Exception as e:
+        print(e)
+        import traceback
+        traceback.print_exc()
+        return {}
+
 @app.route('/fp')
 def fp():
 #from datetime import timedelta, date, datetime
