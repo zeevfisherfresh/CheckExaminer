@@ -265,7 +265,7 @@ def get_patent(patent):
     #in case the reproduced version is not "correct".
     # response = requests.post('https://worldwide.espacenet.com/3.2/rest-services/search?lang=en%2Cde%2Cfr&q=CN104811627A&qlang=cql&p_s=espacenet&p_q=CN104811627A', headers=headers, cookies=cookies, data=data)
 
-def get_claims(patent):
+def get_claims(patent, family):
     import requests
 
     cookies = {
@@ -281,14 +281,15 @@ def get_claims(patent):
         'Connection': 'keep-alive',
         'sec-ch-ua': '"Google Chrome";v="87", " Not;A Brand";v="99", "Chromium";v="87"',
         'Accept': 'multipart/form-data',
-        'EPO-Trace-Id': 'cx8n4p-3nc24t-CCC-000020',
+        'EPO-Trace-Id': 'i1dajl-l9uj6o-CCC-000106',
         'sec-ch-ua-mobile': '?0',
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
         'Sec-Fetch-Site': 'same-origin',
         'Sec-Fetch-Mode': 'cors',
         'Sec-Fetch-Dest': 'empty',
-        'Referer': 'https://worldwide.espacenet.com/patent/search/family/053696092/publication/CN104811627A?q=CN104811627A',
+        'Referer': 'https://worldwide.espacenet.com/patent/search/family/037758479/publication/WO2007022489A2?q=WO2007022489A2',
         'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
+        'If-None-Match': '"0b082684a11d70d9056958a816337754a"',
     }
 
     params = (
@@ -296,12 +297,15 @@ def get_claims(patent):
         ('q', patent),
     )
 
-    print(requests.get('https://worldwide.espacenet.com/3.2/rest-services/highlight/family/053696092/publication/US/2019282908/A1', headers=headers, params=params, cookies=cookies).json())
+    resp = requests.get('https://worldwide.espacenet.com/3.2/rest-services/highlight/family/'+ family + '/publication/'+ patent[:2] +'/'+ patent[2:12] +'/' + (patent[12:] if patent[12:] else 'A1'), headers=headers, params=params, cookies=cookies).text
+    print(resp.find('<div'), resp.rfind('\r\n'))
+    return resp[resp.find('<div'): resp.rfind('\r\n')]
 
     #NB. Original query string below. It seems impossible to parse and
     #reproduce query strings 100% accurately so the one below is given
     #in case the reproduced version is not "correct".
-    # response = requests.get('https://worldwide.espacenet.com/3.2/rest-services/highlight/family/053696092/publication/CN/104811627/A?fields=publications.claims_en&q=CN104811627A', headers=headers, cookies=cookies)
+    # response = requests.get('https://worldwide.espacenet.com/3.2/rest-services/highlight/family/037758479/publication/WO/2007022489/A2?fields=publications.claims_en&q=WO2007022489A2', headers=headers, cookies=cookies)
+
 
 
 

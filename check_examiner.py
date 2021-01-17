@@ -1059,6 +1059,19 @@ def get_patent():
         traceback.print_exc()
         return {}
 
+@app.route('/get_claims')
+def get_claims():
+    try:
+        patent = request.args['patent']
+        family = request.args['family']
+
+        return jsonify(get_split.get_claims(patent, family))
+    except Exception as e:
+        print(e)
+        import traceback
+        traceback.print_exc()
+        return {}
+
 @app.route('/fp')
 def fp():
 #from datetime import timedelta, date, datetime
